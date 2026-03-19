@@ -1,0 +1,22 @@
+FROM eclipse-temurin:17-jdk
+
+WORKDIR /app
+
+# (선택) 윈도우 줄바꿈 문제 방지용 및 curl 설치 (healthcheck용)
+RUN apt-get update && apt-get install -y dos2unix curl && rm -rf /var/lib/apt/lists/*
+
+# gradle wrapper만 먼저 복사해서 캐시 활용
+COPY gradlew gradlew.bat /app/
+COPY gradle /app/gradle
+COPY build.gradle settings.gradle gradle.properties* /app/
+
+RUN chmod +x /app/gradlew && dos2unix /app/gradlew || true
+RUN /app/gradlew --version
+
+EXPOSE 8080
+
+# 소스는 compose volume으로 들어오므로, bootRun만 실행
+# --continuous 옵션으로 파일 변경 시 자동 재시작
+# --no-daemon 옵션으로 데몬 비활성화 (Windows 볼륨 마운트 이슈 방지)
+# sh -c을 사용하여 권한 문제 해결
+CMD ["sh", "-c", "chmod +x /app/gradlew 2>/dev/null || true && dos2unix /app/gradlew 2>/dev/null || true && ./gradlew bootRun --continuous --no-daemon"]

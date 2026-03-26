@@ -1,0 +1,157 @@
+// ============================================================
+// White Theme — auth.scss  (Login & Signup 공용)
+// ============================================================
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+/* ── 페이지 레이아웃 ─────────────────────────────────────────── */
+.auth-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $space-lg;
+  background:
+    radial-gradient(55% 45% at 50% 0%, rgba(109,40,217,0.06) 0%, transparent 70%),
+    $bg-page;
+}
+
+/* ── 카드 ───────────────────────────────────────────────────── */
+.auth-card {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: $r-lg;
+  box-shadow: $shadow-lg;
+  padding: 2.75rem 2.25rem;
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ── 로고 ───────────────────────────────────────────────────── */
+.auth-logo {
+  display: block;
+  text-align: center;
+  font-size: $text-xl;
+  font-weight: $fw-bold;
+  color: $purple;
+  letter-spacing: -0.5px;
+  margin-bottom: $space-lg;
+}
+
+/* ── 제목 / 부제 ─────────────────────────────────────────────── */
+.auth-title {
+  font-size: 1.5rem;
+  font-weight: $fw-bold;
+  color: $fg;
+  text-align: center;
+  margin-bottom: $space-sm;
+}
+
+.auth-sub {
+  color: $muted;
+  text-align: center;
+  font-size: $text-sm;
+  margin-bottom: 2rem;
+}
+
+/* ── 폼 ─────────────────────────────────────────────────────── */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: $space-md;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: $text-sm;
+    font-weight: $fw-medium;
+    color: $gray-700;
+  }
+
+  input {
+    height: 46px;
+    padding: 0 $space-md;
+    background: #fff;
+    border: 1.5px solid $gray-200;
+    border-radius: $r-sm;
+    color: $fg;
+    font-size: $text-sm;
+    outline: none;
+    transition: border-color $ease, box-shadow $ease;
+
+    &::placeholder { color: $gray-400; }
+
+    &:focus {
+      border-color: $purple;
+      box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.10);
+    }
+  }
+}
+
+/* ── 에러 / 성공 ─────────────────────────────────────────────── */
+.auth-error {
+  color: $error;
+  font-size: $text-xs;
+  background: rgba(220, 38, 38, 0.06);
+  border: 1px solid rgba(220, 38, 38, 0.20);
+  border-radius: $r-xs;
+  padding: 0.6rem $space-md;
+}
+
+.auth-success {
+  color: $success;
+  font-size: $text-xs;
+  background: rgba(22, 163, 74, 0.06);
+  border: 1px solid rgba(22, 163, 74, 0.20);
+  border-radius: $r-xs;
+  padding: 0.6rem $space-md;
+}
+
+/* ── 버튼 ───────────────────────────────────────────────────── */
+.auth-btn {
+  margin-top: $space-sm;
+  height: 48px;
+  background: $purple;
+  color: #fff;
+  border: none;
+  border-radius: $r-sm;
+  font-size: $text-md;
+  font-weight: $fw-bold;
+  cursor: pointer;
+  transition: background $ease, transform $ease, box-shadow $ease;
+
+  &:hover:not(:disabled) {
+    background: $purple-2;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(109, 40, 217, 0.25);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* ── 하단 링크 ──────────────────────────────────────────────── */
+.auth-footer {
+  text-align: center;
+  margin-top: $space-lg;
+  font-size: $text-sm;
+  color: $muted;
+
+  a {
+    color: $purple;
+    font-weight: $fw-medium;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+/* ── Signup 전용 ─────────────────────────────────────────────── */
+.required { color: $error;  font-size: 11px; }
+.optional  { color: $gray-400; font-size: 11px; font-weight: $fw-normal; }

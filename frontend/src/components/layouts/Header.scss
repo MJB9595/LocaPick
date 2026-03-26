@@ -1,0 +1,187 @@
+// ============================================================
+// White Theme — Header.scss (Hamburger Menu Version)
+// ============================================================
+@use '../../styles/variables' as *;
+
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000; // 사이드바가 헤더보다 아래에 있도록 조절
+  height: $header-h;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid $gray-200;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: $shadow-sm;
+}
+
+.header-inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; // 양끝 배치
+}
+
+/* ── 로고 ───────────────────────────────────────────────────── */
+.header-logo {
+  font-size: $text-lg;
+  font-weight: $fw-bold;
+  color: $purple;
+  letter-spacing: -0.5px;
+  text-decoration: none;
+  transition: opacity $ease;
+  z-index: 1002; // 메뉴 열려도 클릭 가능하게
+
+  &:hover { opacity: 0.75; }
+}
+
+/* ── 우측 유저 정보 & 햄버거 버튼 ────────────────────────────── */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: $space-md;
+  z-index: 1002; // 메뉴 오버레이보다 위로
+}
+
+.header-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .name {
+    font-size: $text-sm;
+    font-weight: $fw-medium;
+    color: #374151; // $gray-700
+  }
+
+  .badge {
+    padding: 0.15rem 0.55rem;
+    border-radius: $r-pill;
+    background: rgba(109, 40, 217, 0.08);
+    color: $purple;
+    border: 1px solid rgba(109, 40, 217, 0.20);
+    font-size: 10px;
+    font-weight: $fw-bold;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* ── 햄버거 버튼 애니메이션 ─────────────────────────────────── */
+.hamburger-btn {
+  width: 24px;
+  height: 18px;
+  position: relative;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: #374151;
+    border-radius: 2px;
+    transition: all 0.3s ease-in-out;
+    transform-origin: center;
+  }
+
+  // 메뉴가 열렸을 때 X 모양으로 변환
+  &.open {
+    span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    span:nth-child(2) { opacity: 0; }
+    span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+  }
+}
+
+/* ── 사이드바 메뉴 ──────────────────────────────────────────── */
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: -300px; // 기본적으로 화면 밖에 숨김
+  width: 280px;
+  height: 100vh;
+  background: #ffffff;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1001; // 헤더 바디보다는 위, 로고/햄버거보다는 아래
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(#{$header-h} + 20px); // 헤더 높이만큼 여백
+
+  &.open {
+    right: 0; // 화면 안으로 슬라이드 인
+  }
+}
+
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 0 $space-md;
+  gap: 8px;
+
+  &__link {
+    padding: 14px 16px;
+    border-radius: $r-sm;
+    font-size: $text-md;
+    font-weight: $fw-medium;
+    color: #4b5563;
+    text-decoration: none;
+    transition: all $ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.03);
+      color: $purple-2;
+      transform: translateX(4px);
+    }
+
+    &.active {
+      background: rgba(109, 40, 217, 0.08);
+      color: $purple;
+      font-weight: $fw-bold;
+    }
+  }
+}
+
+.side-menu__footer {
+  margin-top: auto;
+  padding: $space-lg $space-md;
+  border-top: 1px solid $gray-200;
+
+  .logout-btn {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid $gray-200;
+    border-radius: $r-sm;
+    background: transparent;
+    color: #6b7280;
+    font-size: $text-sm;
+    font-weight: $fw-bold;
+    cursor: pointer;
+    transition: all $ease;
+
+    &:hover {
+      border-color: rgba(220, 38, 38, 0.40);
+      color: #dc2626;
+      background: rgba(220, 38, 38, 0.05);
+    }
+  }
+}
+
+/* ── 어두운 오버레이 배경 ───────────────────────────────────── */
+.menu-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 1000;
+  cursor: pointer;
+}
+
+/* ── 모바일 처리 ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .header-user-info .name { display: none; } // 모바일에서는 이름 숨기고 뱃지만 표시
+}

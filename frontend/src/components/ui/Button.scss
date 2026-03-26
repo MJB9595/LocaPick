@@ -1,0 +1,57 @@
+@use "@/styles/variables" as *;
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    gap: $btn-gap;
+    padding: $btn-padding-y $btn-padding-x;
+    border-radius: $r-lg;
+    border: 1px solid transparent;
+    font-size: $btn-font-size;
+    font-weight: $btn-font-weight;
+    color: $bg;
+    cursor: pointer;
+    transition: $ease;
+    background: transparent;
+
+    img {
+        width: $btn-icon-size;
+        transition: transform $ease;
+    }
+
+    &:hover {
+
+        transform: translateX($btn-icon-move);
+
+        img {
+            transform: translateX($btn-icon-move);
+        }
+    }
+
+    &.intro {
+        border: 1px solid $purple;
+        background: linear-gradient(90deg,
+                $purple,
+                $purple-2 );
+
+        &:hover {
+            background: linear-gradient(-90deg,
+                    $purple,
+                    $purple-2 );
+            box-shadow: $shadow-intro;
+
+        }
+    }
+    &.primary {
+        background: linear-gradient(90deg,
+      $purple,
+      $purple-2 );
+      width: 100%;
+      &:hover {
+        transform: translateY(0);
+        box-shadow: $shadow-sm;
+      }
+    }
+}

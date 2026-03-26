@@ -1,0 +1,52 @@
+// ============================================================
+// White Theme — Input.scss (UI Component)
+// ============================================================
+@use '../../styles/variables' as *;
+
+.ui-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ui-input-label {
+  font-size: $text-sm;
+  font-weight: $fw-medium;
+  color: $gray-700;
+}
+
+.ui-input-required {
+  color: $error;
+  font-size: 11px;
+}
+
+.ui-input {
+  height: 46px;
+  padding: 0 $space-md;
+  background: #fff;
+  border: 1.5px solid $gray-200;
+  border-radius: $r-sm;
+  color: $fg;
+  font-size: $text-sm;
+  outline: none;
+  transition: border-color $ease, box-shadow $ease;
+  width: 100%;
+
+  &::placeholder { color: $gray-400; }
+
+  &:focus {
+    border-color: $purple;
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.10);
+  }
+
+  .has-error & {
+    border-color: rgba(220, 38, 38, 0.50);
+    &:focus { box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10); }
+  }
+}
+
+.ui-input-error {
+  font-size: $text-xs;
+  color: $error;
+  margin: 0;
+}

@@ -1,0 +1,84 @@
+// ============================================================
+// White Theme — globals.scss
+// ============================================================
+@use "./variables" as *;
+@use "./mixins" as *;
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* ── Reset ─────────────────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  color: $fg;
+  background: $bg;
+  font-family: "Montserrat", "Pretendard", "Segoe UI", Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img   { max-width: 100%; display: block; }
+a     { color: inherit; text-decoration: none; }
+button, input { font: inherit; }
+ul    { margin: 0; padding: 0; list-style: none; }
+
+/* ── App Background ─────────────────────────────────────────
+   화이트 테마: 순백 배경 + 아주 연한 보라 그라데이션 포인트
+────────────────────────────────────────────────────────────── */
+.app-bg {
+  min-height: 100vh;
+  background:
+    radial-gradient(55% 45% at 50% 0%,   rgba(109, 40, 217, 0.06) 0%, transparent 70%),
+    radial-gradient(40% 40% at 100% 100%, rgba(124, 58, 237, 0.04) 0%, transparent 60%),
+    $bg-page;
+}
+
+/* ── Layout Helpers ─────────────────────────────────────────── */
+.container { @include container; }
+
+.page {
+  padding-top: calc(#{$header-h} + 28px);
+  padding-bottom: 60px;
+  background: $bg-page;
+  color: $fg;
+}
+
+section {
+  min-height: 100vh;
+  position: relative;
+}
+
+.inner {
+  position: relative;
+  height: 100%;
+  max-width: $container-sm;
+  margin: auto;
+}
+
+/* ── Card ───────────────────────────────────────────────────── */
+.card {
+  @include glass;
+  border-radius: $r-lg;
+}
+
+/* ── Global Input ───────────────────────────────────────────── */
+.input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: $r-sm;
+  border: 1.5px solid $gray-200;
+  background: #fff;
+  color: $fg;
+  outline: none;
+  transition: border-color $ease, box-shadow $ease;
+
+  &:focus {
+    border-color: $purple;
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.10);
+  }
+
+  &::placeholder { color: $gray-400; }
+}

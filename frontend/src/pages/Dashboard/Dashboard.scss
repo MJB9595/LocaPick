@@ -1,0 +1,149 @@
+// ============================================================
+// White Theme — Dashboard.scss
+// ============================================================
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.dashboard {
+  min-height: calc(100vh - #{$header-h});
+  background: $bg-page;
+  padding-top: calc(#{$header-h} + 2.5rem);
+  padding-bottom: 4rem;
+}
+
+/* ── 웰컴 ───────────────────────────────────────────────────── */
+.dashboard-welcome {
+  margin-bottom: $space-xl;
+
+  h1 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: $fw-bold;
+    color: $fg;
+    margin-bottom: $space-sm;
+
+    .highlight { color: $purple; }
+  }
+
+  p { color: $muted; font-size: $text-sm; }
+}
+
+/* ── 기능 카드 그리드 ─────────────────────────────────────────── */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: $space-md;
+  margin-bottom: $space-xl;
+}
+
+.d-card {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: $r-md;
+  padding: $space-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+  box-shadow: $shadow-sm;
+  @include hoverLift;
+
+  &__icon { font-size: 2rem; line-height: 1; }
+
+  h3 {
+    font-size: $text-md;
+    font-weight: $fw-bold;
+    color: $fg;
+  }
+
+  p {
+    font-size: $text-sm;
+    color: $muted;
+    flex: 1;
+    line-height: 1.55;
+  }
+
+  &__btn {
+    margin-top: $space-sm;
+    padding: 0.5rem $space-md;
+    background: $purple;
+    color: #fff;
+    border: none;
+    border-radius: $r-xs;
+    font-size: $text-sm;
+    font-weight: $fw-medium;
+    cursor: pointer;
+    transition: background $ease, box-shadow $ease;
+
+    &:hover:not(:disabled) {
+      background: $purple-2;
+      box-shadow: 0 4px 12px rgba(109, 40, 217, 0.25);
+    }
+
+    &:disabled {
+      background: $gray-200;
+      color: $gray-500;
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* ── 계정 정보 ──────────────────────────────────────────────── */
+.dashboard-info {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: $r-md;
+  padding: $space-lg;
+  box-shadow: $shadow-sm;
+
+  h2 {
+    font-size: $text-md;
+    font-weight: $fw-bold;
+    color: $fg;
+    margin-bottom: $space-md;
+    padding-bottom: $space-sm;
+    border-bottom: 1px solid $gray-100;
+  }
+}
+
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 0.75rem 0.5rem;
+    text-align: left;
+    font-size: $text-sm;
+    border-bottom: 1px solid $gray-100;
+  }
+
+  th {
+    width: 100px;
+    color: $muted;
+    font-weight: $fw-medium;
+  }
+
+  td { color: $fg; }
+
+  tr:last-child th,
+  tr:last-child td { border-bottom: none; }
+}
+
+/* ── 역할 뱃지 ──────────────────────────────────────────────── */
+.role-badge {
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  border-radius: $r-pill;
+  font-size: $text-xs;
+  font-weight: $fw-bold;
+
+  &--user {
+    background: rgba(109, 40, 217, 0.08);
+    color: $purple;
+    border: 1px solid rgba(109, 40, 217, 0.18);
+  }
+
+  &--admin {
+    background: rgba(217, 119, 6, 0.08);
+    color: #b45309;
+    border: 1px solid rgba(217, 119, 6, 0.22);
+  }
+}

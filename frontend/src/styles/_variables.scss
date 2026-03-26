@@ -1,0 +1,131 @@
+// ============================================================
+// White Theme — _variables.scss
+// ============================================================
+
+// =============================
+// Core Colors
+// =============================
+
+$bg:     #ffffff;          // 페이지 배경 (순백)
+$fg:     #1a1a2e;          // 기본 텍스트 (다크 네이비)
+$muted:  #6b7280;          // 보조 텍스트 (회색)
+
+// Primary accent — 화이트 배경에서 충분한 대비를 위해 약간 진하게
+$purple:   #6d28d9;        // 주 액션 컬러
+$purple-2: #7c3aed;        // 호버 / 강조
+$aquablue: #30d9ff;
+
+// Surface & Border
+$line:  rgba(0, 0, 0, 0.10);   // 테두리 (연회색)
+$card:  #ffffff;               // 카드 배경 (순백)
+
+// Semantic
+$error:   #dc2626;
+$success: #16a34a;
+$warning: #d97706;
+
+// =============================
+// Gray Scale
+// =============================
+
+$gray-50:  #fafafa;
+$gray-100: #f5f5f5;
+$gray-200: #e5e5e5;
+$gray-300: #d4d4d4;
+$gray-400: #a3a3a3;
+$gray-500: #737373;
+$gray-600: #525252;
+$gray-700: #404040;
+$gray-800: #262626;
+$gray-900: #171717;
+
+// =============================
+// Background Surfaces
+// =============================
+
+$bg-page:  #f3f4f6;        // 페이지 배경 (살짝 회색빛)
+$bg-soft:  #f9fafb;        // 섹션 배경
+$bg-hover: rgba(109, 40, 217, 0.06);  // 호버 배경
+
+// =============================
+// Shadow
+// =============================
+
+
+$shadow-intro: 0 10px 10px rgba(0, 0, 0, 0.747);
+$shadow:    0 4px 24px rgba(0, 0, 0, 0.08);
+$shadow-sm: 0 2px 8px  rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+
+// =============================
+// Radius
+// =============================
+
+$r-lg:   24px;
+$r-md:   16px;
+$r-sm:   12px;
+$r-xs:   8px;
+$r-pill: 999px;
+
+// =============================
+// Spacing
+// =============================
+
+$space-sm: 8px;
+$space-md: 16px;
+$space-lg: 24px;
+$space-xl: 36px;
+
+// =============================
+// Layout
+// =============================
+
+$container-lg: 1200px;
+$container-md: 960px;
+$container-sm: 590px;
+
+$header-h:    64px;
+$section-gap: 120px;
+
+// =============================
+// Typography
+// =============================
+
+$text-xs:  12px;
+$text-sm:  14px;
+$text-md:  16px;
+$text-lg:  20px;
+$text-xl:  28px;
+$text-2xl: 54px;
+
+$fw-normal: 400;
+$fw-medium: 500;
+$fw-bold:   700;
+
+// =============================
+// Motion
+// =============================
+
+$ease:      0.25s ease;
+$ease-fast: 0.15s ease;
+
+// =============================
+// Z-index
+// =============================
+
+$z-header: 100;
+$z-modal:  1000;
+$z-toast:  2000;
+
+// =============================
+// Button
+// =============================
+
+$btn-gap:         $space-sm;
+$btn-padding-y:   12px;
+$btn-padding-x:   22px;
+$btn-font-size:   $text-sm;
+$btn-font-weight: $fw-medium;
+$btn-icon-size:   16px;
+$btn-icon-move:   4px;
+$btn-hover-y:     -2px;

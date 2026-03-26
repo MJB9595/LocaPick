@@ -1,0 +1,29 @@
+// ============================================================
+// White Theme — Footer.scss
+// ============================================================
+@use '../../styles/variables' as *;
+
+.footer {
+  border-top: 1px solid $gray-200;
+  background: #fff;
+  padding: $space-lg 0;
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $space-sm;
+}
+
+.footer-brand {
+  font-size: $text-sm;
+  font-weight: $fw-bold;
+  color: $purple;
+}
+
+.footer-copy {
+  font-size: $text-xs;
+  color: $muted;
+}

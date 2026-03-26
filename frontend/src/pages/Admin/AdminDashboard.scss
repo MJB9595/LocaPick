@@ -1,0 +1,214 @@
+// ============================================================
+// White Theme — AdminDashboard.scss
+// ============================================================
+@use '../../styles/variables' as *;
+
+.admin {
+  min-height: calc(100vh - #{$header-h});
+  background: $bg-page;
+  padding-top: calc(#{$header-h} + 2.5rem);
+  padding-bottom: 4rem;
+}
+
+/* ── 헤더 ───────────────────────────────────────────────────── */
+.admin-header {
+  margin-bottom: $space-xl;
+
+  h1 {
+    font-size: clamp(1.4rem, 3vw, 1.8rem);
+    font-weight: $fw-bold;
+    color: $fg;
+    margin-bottom: $space-sm;
+  }
+
+  p {
+    color: $muted;
+    font-size: $text-sm;
+
+    strong {
+      color: $purple;
+      font-weight: $fw-medium;
+    }
+  }
+}
+
+/* ── 통계 카드 ──────────────────────────────────────────────── */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: $space-md;
+  margin-bottom: $space-xl;
+}
+
+.stat-card {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: $r-md;
+  padding: $space-lg $space-md;
+  box-shadow: $shadow-sm;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-left: 4px solid $gray-200;       // 기본: 회색
+  transition: box-shadow $ease, transform $ease;
+
+  &:hover { box-shadow: $shadow; transform: translateY(-2px); }
+
+  &--active    { border-left-color: $success; }
+  &--admin     { border-left-color: $purple; }
+  &--warn      { border-left-color: $warning; }
+
+  &__num {
+    font-size: 2.25rem;
+    font-weight: $fw-bold;
+    color: $fg;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: $text-xs;
+    color: $muted;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* ── 회원 목록 섹션 ─────────────────────────────────────────── */
+.admin-table-wrap {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: $r-md;
+  padding: $space-lg;
+  box-shadow: $shadow-sm;
+}
+
+.admin-table-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $space-lg;
+  gap: $space-md;
+  flex-wrap: wrap;
+
+  h2 {
+    font-size: $text-md;
+    font-weight: $fw-bold;
+    color: $fg;
+  }
+}
+
+/* ── 검색 인풋 ──────────────────────────────────────────────── */
+.admin-search {
+  height: 40px;
+  padding: 0 $space-md;
+  background: #fff;
+  border: 1.5px solid $gray-200;
+  border-radius: $r-xs;
+  color: $fg;
+  font-size: $text-sm;
+  outline: none;
+  min-width: 220px;
+  transition: border-color $ease, box-shadow $ease;
+
+  &::placeholder { color: $gray-400; }
+
+  &:focus {
+    border-color: $purple;
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.10);
+  }
+}
+
+.table-scroll { overflow-x: auto; }
+
+/* ── 테이블 ─────────────────────────────────────────────────── */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $text-sm;
+
+  th {
+    padding: 0.65rem 0.75rem;
+    text-align: left;
+    color: $muted;
+    font-weight: $fw-medium;
+    border-bottom: 2px solid $gray-100;
+    white-space: nowrap;
+    font-size: $text-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    background: $bg-soft;
+  }
+
+  td {
+    padding: 0.8rem 0.75rem;
+    color: $fg;
+    border-bottom: 1px solid $gray-100;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    transition: background $ease-fast;
+
+    &:hover { background: rgba(109, 40, 217, 0.025); }
+    &:last-child td { border-bottom: none; }
+  }
+
+  .td-id    { color: $muted; font-size: $text-xs; }
+  .td-email { color: $gray-600; }
+  .td-date  { color: $muted; font-size: $text-xs; }
+
+  &__empty {
+    text-align: center;
+    padding: 3rem !important;
+    color: $muted;
+  }
+}
+
+/* ── 테이블 뱃지 ─────────────────────────────────────────────── */
+.tbadge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: $r-pill;
+  font-size: $text-xs;
+  font-weight: $fw-bold;
+  white-space: nowrap;
+
+  // 역할
+  &--role-user {
+    background: rgba(109, 40, 217, 0.08);
+    color: $purple;
+    border: 1px solid rgba(109, 40, 217, 0.18);
+  }
+  &--role-admin {
+    background: rgba(217, 119, 6, 0.08);
+    color: #b45309;
+    border: 1px solid rgba(217, 119, 6, 0.22);
+  }
+
+  // 상태
+  &--status-active {
+    background: rgba(22, 163, 74, 0.08);
+    color: #15803d;
+    border: 1px solid rgba(22, 163, 74, 0.20);
+  }
+  &--status-suspended {
+    background: rgba(217, 119, 6, 0.08);
+    color: #b45309;
+    border: 1px solid rgba(217, 119, 6, 0.22);
+  }
+  &--status-deleted {
+    background: rgba(220, 38, 38, 0.06);
+    color: $error;
+    border: 1px solid rgba(220, 38, 38, 0.18);
+  }
+}
+
+/* ── 메시지 ─────────────────────────────────────────────────── */
+.admin-msg {
+  padding: 2rem;
+  text-align: center;
+  color: $muted;
+  font-size: $text-sm;
+
+  &--error { color: $error; }
+}

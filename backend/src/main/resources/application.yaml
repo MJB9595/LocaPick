@@ -1,19 +1,28 @@
 spring:
   application:
-    name: demo
+    name: picstory-backend
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/cruddb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul}
     username: ${SPRING_DATASOURCE_USERNAME:cruduser}
     password: ${SPRING_DATASOURCE_PASSWORD:crudpass}
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: update      # 개발: update | 운영: validate 또는 none
     show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
 
+# ─── JWT ──────────────────────────────────────────────────────
+jwt:
+  # 최소 32자 이상의 시크릿 키 (운영환경에서는 환경변수로 주입)
+  secret: ${JWT_SECRET:picstory-secret-key-must-be-at-least-32-chars!}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}   # 24시간 (ms)
+
+# ─── Actuator ─────────────────────────────────────────────────
 management:
   endpoints:
     web:
@@ -22,3 +31,6 @@ management:
   endpoint:
     health:
       show-details: always
+# ─── Kakao API ────────────────────────────────────────────────
+kakao:
+  rest-key: ${KAKAO_REST_KEY:d0d3b335c07afc61d7c86e2807ff89f3}

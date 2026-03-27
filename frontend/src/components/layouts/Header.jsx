@@ -59,6 +59,9 @@ const Header = () => {
           <NavLink to="/app/favorites" className={({ isActive }) => `side-nav__link ${isActive ? 'active' : ''}`} onClick={closeMenu}>
             즐겨찾기
           </NavLink>
+          <NavLink to="/app/memo" className={({ isActive }) => `side-nav__link ${isActive ? 'active' : ''}`} onClick={closeMenu}>
+            메모
+          </NavLink>
           {isAdmin && (
             <NavLink to="/admin" className={({ isActive }) => `side-nav__link ${isActive ? 'active' : ''}`} onClick={closeMenu}>
               어드민

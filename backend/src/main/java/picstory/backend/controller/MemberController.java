@@ -32,4 +32,10 @@ public class MemberController {
     public ResponseEntity<MemberResponse> getOne(@PathVariable Long id) {
         return ResponseEntity.ok(MemberResponse.from(memberService.findById(id)));
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<MemberResponse> getMyInfo(org.springframework.security.core.Authentication auth) {
+        Long memberId = (Long) auth.getPrincipal();
+        return ResponseEntity.ok(MemberResponse.from(memberService.findById(memberId)));
+    }
 }

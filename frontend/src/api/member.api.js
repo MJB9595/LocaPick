@@ -11,3 +11,7 @@ export const getMember = (id) =>
 /** 회원 상태 및 역할 변경 (ADMIN 전용) */
 export const updateMemberStatus = (id, status, role = null) =>
   client.patch(`/admin/members/${id}/status`, { status, role }).then((r) => r.data)
+
+/** 마이페이지용 내 정보 가져오기 */
+export const getMyInfo = () => 
+  client.get('/members/me').then((r) => r.data);

@@ -11,6 +11,7 @@ import ProtectRoute from '../store/ProtectRoute'
 import MapHome from '../pages/Map/MapHome'
 import MyPage from '../pages/MyPage/MyPage'
 import Favorites from '../pages/Favorites/Favorites'
+import Memo from '../pages/Memo/Memo'
 
 export const router = createBrowserRouter([
   {
@@ -35,6 +36,8 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'mypage', element: <MyPage /> },
       { path: 'favorites', element: <Favorites /> },
+      { path: 'memo', element: <Memo /> },
+
     ],
   },
   {

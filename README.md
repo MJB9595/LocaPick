@@ -76,7 +76,7 @@
 
 | 메인 지도 & 길찾기 | LocaPick 추천 알고리즘 |
 | :---: | :---: |
-| <img width="250" alt="Image" src="https://github.com/user-attachments/assets/0c8d182c-e43e-4b16-b39c-ba5f5c87f2e9" /> | <img width="250" alt="Image" src="https://github.com/user-attachments/assets/ba72cf3d-0e84-49e6-a85b-37a2c8a51e3b" /> |
+| <img width="450" alt="Image" src="https://github.com/user-attachments/assets/0c8d182c-e43e-4b16-b39c-ba5f5c87f2e9" /> | <img width="250" alt="Image" src="https://github.com/user-attachments/assets/ba72cf3d-0e84-49e6-a85b-37a2c8a51e3b" /> |
 <br>
 
 ## 🚀 시작하기 (Getting Started)

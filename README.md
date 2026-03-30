@@ -1,4 +1,4 @@
-# 📍 LocaPick (로카픽)
+# LocaPick (로카픽)
 
 > **"어디로 갈지 고민될 때, 당신을 위한 최적의 장소 추천 및 통합 길찾기 플랫폼"** > 위치 기반 맞춤형 장소 추천부터 도보/대중교통/자동차 통합 길찾기, 그리고 나만의 장소 기록(메모/즐겨찾기)까지 한 번에 해결하는 풀스택 웹 서비스입니다.
 
@@ -10,7 +10,7 @@
 
 ---
 
-## 📢 프로젝트 소개
+## 프로젝트 소개
 
 **LocaPick**은 단순히 지도를 보여주는 것을 넘어, 사용자의 **현재 위치와 이동 가능한 시간(도보 기준)**을 바탕으로 최적의 장소를 추천해 주는 서비스입니다. 
 추천받은 장소는 즉시 목적지로 설정하여 다양한 교통수단의 경로를 비교할 수 있으며, 다녀온 장소는 별점(즐겨찾기)과 메모로 기록하여 나만의 장소 아카이브를 구축할 수 있습니다.
@@ -20,27 +20,27 @@
 
 <br>
 
-## ✨ 핵심 기능 (Key Features)
+## 핵심 기능 (Key Features)
 
-### 1. 🗺️ 통합 지도 및 다중 길찾기
+### 1. 통합 지도 및 다중 길찾기
 - 카카오맵 SDK를 활용한 부드러운 지도 렌더링 및 키워드 장소 검색.
 - 출발지-도착지 설정 시 **도보(Tmap API), 대중교통(ODsay API), 자동차(Kakao Navi API)** 경로 및 소요 시간/비용 통합 비교 제공.
 
-### 2. ✨ LocaPick 추천 알고리즘
+### 2. LocaPick 추천 알고리즘
 - 사용자가 입력한 '최대 소요 시간(분)'을 도보 반경(m)으로 변환하여 주변의 특정 카테고리(음식점, 옷가게 등) 장소 탐색.
 - 카카오 Local API 데이터에 자체적인 가중치(리뷰 수, 유저 평점 등) 알고리즘을 적용하여 랭킹 순으로 추천.
 
-### 3. ⭐ 즐겨찾기 및 장소 태그 메모 (아카이빙)
+### 3. 즐겨찾기 및 장소 태그 메모 (아카이빙)
 - 마음에 드는 장소를 원클릭으로 찜(즐겨찾기)하여 마이페이지에서 관리.
 - 다녀온 장소를 태그하여 카테고리별(일상, 여행, 취미 등)로 나만의 텍스트 메모 작성 기능.
 
-### 4. 🔐 JWT 기반 인증 및 어드민 대시보드
+### 4. JWT 기반 인증 및 어드민 대시보드
 - Spring Security와 JWT 토큰을 활용한 안전한 Stateless 인증 인가 구현.
 - 일반 유저와 분리된 **관리자(ADMIN)** 전용 대시보드에서 전체 회원의 상태(활성/정지/탈퇴) 및 권한 제어.
 
 <br>
 
-## 🛠 기술 스택 (Tech Stack)
+## 기술 스택 (Tech Stack)
 
 ### Frontend
 - **Framework:** React 18, Vite
@@ -61,9 +61,9 @@
 
 <br>
 
-## 🏗 시스템 아키텍처 (System Architecture)
+## 시스템 아키텍처 (System Architecture)
 
-![Architecture Diagram]
+
 ![Image](https://github.com/user-attachments/assets/b37c8c04-76c0-4c01-8586-db1a1f5bd11f)
 
 - 프론트엔드(`Axios`)의 모든 요청은 `client.js`의 Interceptor를 통해 JWT 토큰이 탑재됩니다.
@@ -72,14 +72,25 @@
 
 <br>
 
-## 📸 스크린샷 (Screenshots)
+## MySQL (DataBase Structure)
+
+<img width="842" height="1196" alt="Image" src="https://github.com/user-attachments/assets/422dc2c4-293c-4243-8c32-d6dca6d602c9" />
+
+- 사용자 중심의 관계형 설계를 통해 members (회원) 테이블을 최상위 부모로 두고,
+- favorites (즐겨찾기)와 posts (장소 메모) 테이블이 외래키(member_id)를 통해 N:1로 안전하게 매핑된 정석적인 RDBMS 구조입니다.
+- 데이터베이스를 직관적이며, 유연성과 추후 확장성을 포함해 구상함으로써 시스템의 복잡도를 낮춰 유지보수를 용이하게 만들었으며,
+- 추후 프로필 사진 기능이나 소셜 로그인 등이 추가되더라도 기존 테이블 구조를 해치지 않고 유연하게 확장할 수 있도록 설계되었습니다.
+  
+<br>
+
+## 스크린샷 (Screenshots)
 
 | 메인 지도 & 길찾기 | LocaPick 추천 알고리즘 |
 | :---: | :---: |
 | <img width="450" alt="Image" src="https://github.com/user-attachments/assets/0c8d182c-e43e-4b16-b39c-ba5f5c87f2e9" /> | <img width="250" alt="Image" src="https://github.com/user-attachments/assets/ba72cf3d-0e84-49e6-a85b-37a2c8a51e3b" /> |
 <br>
 
-## 🚀 시작하기 (Getting Started)
+## 시작하기 (Getting Started)
 
 ### 1. 환경 변수 설정 (.env)
 프론트엔드 루트 디렉토리에 `.env` 파일을 생성하고 API 키를 입력합니다.
@@ -122,7 +133,7 @@ cd LocaPick
 docker-compose up -d --build
 ```
 
-💡 Trouble Shooting & Dev Log
+ Trouble Shooting & Dev Log
 CORS 및 Nginx 프록시 문제: 프론트엔드(Vite)와 백엔드(Spring) 분리 배포 시 발생하는 CORS 에러를 Nginx의 리버스 프록시(proxy_pass) 설정을 통해 해결했습니다.
 
 JPA 500/404 사일런트 에러 디버깅: 백엔드 API 연동 중, 엔티티의 @Table(name = "posts") 누락으로 인한 404(NoResourceFoundException) 에러가 500 에러로 마스킹되는 현상을 GlobalExceptionHandler에 로깅을 추가하여 추적하고 해결했습니다.

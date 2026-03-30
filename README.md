@@ -63,7 +63,8 @@
 
 ## 🏗 시스템 아키텍처 (System Architecture)
 
-![Architecture Diagram](![Image](https://github.com/user-attachments/assets/b37c8c04-76c0-4c01-8586-db1a1f5bd11f))  
+![Architecture Diagram]
+![Image](https://github.com/user-attachments/assets/b37c8c04-76c0-4c01-8586-db1a1f5bd11f)
 
 - 프론트엔드(`Axios`)의 모든 요청은 `client.js`의 Interceptor를 통해 JWT 토큰이 탑재됩니다.
 - 백엔드 최전방의 `JwtAuthFilter`가 권한을 검증한 뒤, 각 Controller로 안전하게 라우팅합니다.

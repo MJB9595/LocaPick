@@ -372,10 +372,12 @@ const MapHome = () => {
                     </strong>
                     <span className="address">{place.road_address_name || place.address_name}</span>
                   </div>
-                  <div className="place-actions">
-                    <button onClick={(e) => handleSetPoint(place, 'START', e)} className="btn-set start">출발지</button>
-                    <button onClick={(e) => handleSetPoint(place, 'END', e)} className="btn-set end">도착지</button>
-                  </div>
+                  {selectedPlace?.name === place.place_name && (
+                    <div className="place-actions">
+                      <button onClick={(e) => handleSetPoint(place, 'START', e)} className="btn-set start">출발지</button>
+                      <button onClick={(e) => handleSetPoint(place, 'END', e)} className="btn-set end">도착지</button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

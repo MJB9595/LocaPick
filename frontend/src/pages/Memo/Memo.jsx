@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getPosts, createPost, updatePost, deletePost } from '../../api/post.api';
+import { getMyPosts, createPost, updatePost, deletePost } from '../../api/post.api';
 import { getMyFavorites } from '../../api/favorite.api';
 import './Memo.scss';
 
@@ -25,7 +25,7 @@ const Memo = () => {
  const fetchData = async () => {
     // 1. 메모 로드 (실패해도 밑에 코드 실행됨)
     try {
-      const postsData = await getPosts();
+      const postsData = await getMyPosts();
       setPosts(postsData);
     } catch (error) {
       console.error("메모 로드 실패:", error);

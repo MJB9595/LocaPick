@@ -65,7 +65,6 @@
   @include glass; border-radius: $r-md; padding: 20px; position: relative; transition: all 0.2s ease;
   &:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); border-color: rgba($purple, 0.2); }
   &__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
-  &__name { font-size: $text-md; font-weight: $fw-bold; color: $fg; line-height: 1.4; flex: 1; margin-right: 8px; }
   &__name { 
     font-size: $text-md; font-weight: $fw-bold; color: $fg; line-height: 1.4; flex: 1; margin-right: 8px; 
     display: flex; align-items: center; gap: 8px; flex-wrap: wrap; /* 주차장 뱃지와 나란히 배치 */

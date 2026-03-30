@@ -54,6 +54,26 @@ const getTmapWalkData = async (startPos, endPos, startName = "출발", endName =
   return { path: [startPos, endPos], distance: 0, time: 0 }; 
 };
 
+const StarIcon = ({ isFilled }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 24 24" 
+    width="22" height="22"
+    fill={isFilled ? "#F59E0B" : "none"} 
+    stroke={isFilled ? "#F59E0B" : "#94A3B8"} /* 빈 별일 때 진한 슬레이트 회색(#94A3B8) 테두리 */
+    strokeWidth="2" 
+    strokeLinecap="round" strokeLinejoin="round"
+    style={{ 
+      transition: 'all 0.2s', 
+      filter: isFilled ? 'drop-shadow(0 2px 4px rgba(245, 158, 11, 0.4))' : 'none',
+      verticalAlign: 'middle',
+      marginBottom: '2px'
+    }}
+  >
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+  </svg>
+);
+
 // =======================================================
 // 메인 컴포넌트 시작
 // =======================================================
@@ -365,9 +385,11 @@ const MapHome = () => {
                 <div key={idx} className={`place-item ${selectedPlace?.name === place.place_name ? 'selected' : ''}`} onClick={() => handleSelectPlace(place)}>
                   <div className="place-info">
                     <strong>{place.place_name}
-                      <button onClick={(e) => handleToggleStar(place.place_name, parseFloat(place.y), parseFloat(place.x), place.road_address_name || place.address_name, e)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', color: isFavoritePlace(place.place_name) ? '#FFD700' : '#CCC' }}>
-                        {isFavoritePlace(place.place_name) ? '⭐' : '☆'}
+                      <button 
+                        onClick={(e) => handleToggleStar(place.place_name, parseFloat(place.y), parseFloat(place.x), place.road_address_name || place.address_name, e)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginLeft: '6px' }}
+                      >
+                        <StarIcon isFilled={isFavoritePlace(place.place_name)} />
                       </button>
                     </strong>
                     <span className="address">{place.road_address_name || place.address_name}</span>
@@ -385,11 +407,16 @@ const MapHome = () => {
 
           <div className="route-info">
             <div className="route-point"><span className="badge start-badge">출발</span><span>{startPoint ? startPoint.name : '설정되지 않음'}</span></div>
-            <div className="route-point"><span className="badge end-badge">도착</span><span>{endPoint ? endPoint.name : '설정되지 않음'}</span>
+            <div className="route-point">
+              <span className="badge end-badge">도착</span>
+              <span>{endPoint ? endPoint.name : '설정되지 않음'}</span>
               {endPoint && (
-                <button onClick={(e) => handleToggleStar(endPoint.name, endPoint.lat, endPoint.lng, endPoint.address, e)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', marginLeft: '8px', color: isFavoritePlace(endPoint.name) ? '#FFD700' : '#CCC' }} title="즐겨찾기 추가/해제">
-                  {isFavoritePlace(endPoint.name) ? '⭐' : '☆'}
+                <button 
+                  onClick={(e) => handleToggleStar(endPoint.name, endPoint.lat, endPoint.lng, endPoint.address, e)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginLeft: '8px' }}
+                  title="즐겨찾기 추가/해제"
+                >
+                  <StarIcon isFilled={isFavoritePlace(endPoint.name)} />
                 </button>
               )}
             </div>
@@ -577,10 +604,13 @@ const MapHome = () => {
                           <div key={idx} className="loca-card" onClick={() => handleSelectLocaPlace(place)}>
                             <div className="card-header">
                               <span className="rank">{idx + 1}위</span>
-                              <strong>{place.name}
-                                <button onClick={(e) => handleToggleStar(place.name, place.lat, place.lng, place.address, e)}
-                                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', marginLeft: '5px', color: isFavoritePlace(place.name) ? '#FFD700' : '#CCC' }}>
-                                  {isFavoritePlace(place.name) ? '⭐' : '☆'}
+                              <strong>
+                                {place.name}
+                                <button 
+                                  onClick={(e) => handleToggleStar(place.name, place.lat, place.lng, place.address, e)}
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginLeft: '6px' }}
+                                >
+                                  <StarIcon isFilled={isFavoritePlace(place.name)} />
                                 </button>
                               </strong>
                             </div>

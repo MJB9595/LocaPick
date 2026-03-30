@@ -66,4 +66,27 @@ public class FavoriteController {
         
         return ResponseEntity.ok(Map.of("isFavorite", true, "message", "즐겨찾기 추가됨"));
     }
+
+    // 즐겨찾기 카테고리 변경 API
+    @PatchMapping("/{id}/category")
+    @Transactional
+    public ResponseEntity<?> updateCategory(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> requestData,
+            Authentication auth) {
+
+        Long memberId = (Long) auth.getPrincipal();
+        String newCategory = requestData.get("category");
+
+        Favorite favorite = favoriteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("즐겨찾기를 찾을 수 없습니다."));
+
+        // 내 즐겨찾기가 맞는지 권한 체크
+        if (!favorite.getMember().getId().equals(memberId)) {
+            throw new IllegalStateException("권한이 없습니다.");
+        }
+
+        favorite.updateCategory(newCategory);
+        return ResponseEntity.ok(Map.of("success", true, "message", "카테고리가 변경되었습니다."));
+    }
 }

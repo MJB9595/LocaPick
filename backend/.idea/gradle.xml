@@ -7,7 +7,7 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$" />
+            <option value="$USER_HOME$/빌드 및 컴파일/LocaPick_V2/backend" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom'; // 🌟 즐겨찾기에서 넘어오는 데이터 수신용
 import { Map, MapMarker, Polyline, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import { getLocapickResults } from '../../api/locapick.api';
 import { getMyFavorites, toggleFavorite } from '../../api/favorite.api';
@@ -6,7 +7,7 @@ import './MapHome.scss';
 
 const { kakao } = window;
 
-
+// --- [헬퍼 함수] 직선 거리 계산 ---
 const getDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371e3; 
   const p1 = lat1 * Math.PI/180;
@@ -18,6 +19,7 @@ const getDistance = (lat1, lon1, lat2, lon2) => {
   return Math.round(R * c);
 };
 
+// --- [헬퍼 함수] Tmap 도보 경로 탐색 ---
 const getTmapWalkData = async (startPos, endPos, startName = "출발", endName = "도착") => {
   const TMAP_KEY = import.meta.env.VITE_TMAP_KEY;
   if (!TMAP_KEY) return { path: [startPos, endPos], distance: 0, time: 0 };
@@ -52,17 +54,28 @@ const getTmapWalkData = async (startPos, endPos, startName = "출발", endName =
   return { path: [startPos, endPos], distance: 0, time: 0 }; 
 };
 
+// =======================================================
+// 메인 컴포넌트 시작
+// =======================================================
 const MapHome = () => {
+  const location = useLocation(); // 라우터 값 받아오기
+  const mapWrapperRef = useRef(null); // 지도 크기 감지 센서
+
+  // [기본 지도 상태]
+  const [mapInstance, setMapInstance] = useState(null); 
   const [center, setCenter] = useState({ lat: 37.5665, lng: 126.9780 });
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
 
+  // [검색 및 로딩 상태]
   const [keyword, setKeyword] = useState('');
   const [places, setPlaces] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false); 
+  const [myFavorites, setMyFavorites] = useState([]);
 
+  // [길찾기 상태]
   const [activeTab, setActiveTab] = useState(null); 
   const [carRoute, setCarRoute] = useState(null); 
   const [walkRoute, setWalkRoute] = useState(null); 
@@ -71,16 +84,16 @@ const MapHome = () => {
   const [transitLines, setTransitLines] = useState([]);
   const [transitDetails, setTransitDetails] = useState([]);
   const [transitInfo, setTransitInfo] = useState(null);
-  const [myFavorites, setMyFavorites] = useState([]);
 
-  // 🌟 LOCAPICK: 상태 관리 추가
+  // [LOCAPICK 상태]
   const [isLocapickOpen, setIsLocapickOpen] = useState(false);
-  const [locaTime, setLocaTime] = useState(15); // 기본 15분
-  const [locaCount, setLocaCount] = useState(3); // 기본 3개
-  const [locaCategory, setLocaCategory] = useState('restaurant'); // 'restaurant' or 'clothes'
+  const [locaTime, setLocaTime] = useState(15); 
+  const [locaCount, setLocaCount] = useState(3); 
+  const [locaCategory, setLocaCategory] = useState('restaurant'); 
   const [locaResults, setLocaResults] = useState([]);
   const [isLocaLoading, setIsLocaLoading] = useState(false);
 
+  // 1. 초기 접속 시 내 위치 가져오기
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -95,6 +108,7 @@ const MapHome = () => {
     } else { setIsLoading(false); }
   }, []);
 
+  // 2. 즐겨찾기 목록 불러오기
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
@@ -107,76 +121,81 @@ const MapHome = () => {
     fetchFavorites();
   }, []);
 
-  // 즐겨찾기 버튼 클릭 시 작동하는 통합 함수 (검색목록, 도착지 공용)
+  // 🌟 3. 다른 페이지(즐겨찾기)에서 길찾기로 넘어왔을 때 목적지 세팅
+  useEffect(() => {
+    if (location.state && location.state.destination) {
+      const dest = location.state.destination;
+      const pointData = { 
+        name: dest.placeName, 
+        lat: parseFloat(dest.lat), 
+        lng: parseFloat(dest.lng), 
+        address: dest.address 
+      };
+      setEndPoint(pointData);
+      setCenter(pointData);
+    }
+  }, [location.state]);
+
+  // 🌟 4. 사이드바 스크롤 등 박스 크기가 변할 때 지도 짤림 방지
+  useEffect(() => {
+    if (!mapInstance || !mapWrapperRef.current) return;
+    const observer = new ResizeObserver(() => {
+      mapInstance.relayout();
+    });
+    observer.observe(mapWrapperRef.current);
+    return () => observer.disconnect();
+  }, [mapInstance]);
+
+  // --- [액션 핸들러] 즐겨찾기 토글 ---
   const handleToggleStar = async (name, lat, lng, address, e) => {
-    if (e) e.stopPropagation(); // 부모 요소의 클릭 이벤트(출발/도착지 설정 등)가 실행되는 것을 막음
-    
+    if (e) e.stopPropagation(); 
     try {
       const res = await toggleFavorite({ name, lat, lng, address });
-
       if (res.isFavorite) {
         setMyFavorites([{ placeName: name }, ...myFavorites]);
       } else {
         setMyFavorites(myFavorites.filter(fav => fav.placeName !== name));
       }
     } catch (error) {
-      alert("즐겨찾기 처리 중 오류가 발생했습니다. 로그인이 되어있는지 확인해주세요.");
+      alert("즐겨찾기 처리 중 오류가 발생했습니다.");
     }
   };
 
-  // 특정 장소가 즐겨찾기 목록에 있는지 확인하는 헬퍼 함수
   const isFavoritePlace = (placeName) => {
     return myFavorites.some(fav => fav.placeName === placeName);
   };
 
-
-  // LOCAPICK: 백엔드 연동 버전
+  // --- [액션 핸들러] LOCAPICK 알고리즘 실행 ---
   const runLocapickAlgorithm = async () => {
     if (!startPoint) {
       alert("출발지(내 위치 또는 검색한 장소)를 먼저 설정해주세요!");
       return;
     }
-    
-    setIsLocaLoading(true);
-    setLocaResults([]);
-
+    setIsLocaLoading(true); setLocaResults([]);
     try {
-      // 1. 백엔드 서버로 계산 요청 쏘기
       const data = await getLocapickResults({
-        lat: startPoint.lat,
-        lng: startPoint.lng,
-        time: locaTime,
-        count: locaCount,
-        category: locaCategory
+        lat: startPoint.lat, lng: startPoint.lng,
+        time: locaTime, count: locaCount, category: locaCategory
       });
-
-      // 2. 만약 결과가 없다면 알림
       if (data.length === 0) {
         alert(`출발지 주변 도보 ${locaTime}분 이내에는 해당 장소가 없습니다.\n시간을 조금 더 늘려보세요!`);
       } else {
-        // 3. 백엔드가 계산해서 준 완벽한 결과를 그대로 State에 꽂기
         setLocaResults(data);
       }
     } catch (error) {
-      console.error(error);
       alert("서버에서 LocaPick 알고리즘을 실행하는 중 오류가 발생했습니다.");
     } finally {
       setIsLocaLoading(false);
     }
   };
 
-  // 🌟 LOCAPICK: 추천된 가게를 눌렀을 때 목적지로 설정
   const handleSelectLocaPlace = (place) => {
     const pointData = { name: place.name, lat: place.lat, lng: place.lng };
-    setEndPoint(pointData);
-    setCenter(pointData);
-    setIsLocapickOpen(false); // 모달 닫기
-    
-    // 길찾기 상태 초기화 후 유도
-    setActiveTab(null);
-    setCarRoute(null); setWalkRoute(null); setTransitRoutes([]); setTransitLines([]);
+    setEndPoint(pointData); setCenter(pointData); setIsLocapickOpen(false);
+    setActiveTab(null); setCarRoute(null); setWalkRoute(null); setTransitRoutes([]); setTransitLines([]);
   };
 
+  // --- [액션 핸들러] 카카오 로컬 검색 ---
   const searchPlaces = (e) => {
     e.preventDefault();
     if (!keyword.trim()) return;
@@ -200,6 +219,7 @@ const MapHome = () => {
     setPlaces([]); setKeyword(''); setSelectedPlace(null); setActiveTab(null); setCarRoute(null); setWalkRoute(null); setTransitRoutes([]); setTransitLines([]);
   };
 
+  // --- [액션 핸들러] 길찾기 통합 API 호출 ---
   const handleSearchAllRoutes = async () => {
     if (!startPoint || !endPoint) return;
     setIsSearching(true);
@@ -208,6 +228,7 @@ const MapHome = () => {
     const walkDist = Math.round(straightDist * 1.3); 
     const walkTime = Math.round(walkDist / 80) * 60; 
     
+    // 도보
     const tmapWalk = await getTmapWalkData(startPoint, endPoint);
     if (tmapWalk.path.length > 2) {
       setWalkRoute({ lines: [{ type: 'WALK', path: tmapWalk.path }], info: { distance: tmapWalk.distance, duration: tmapWalk.time } });
@@ -215,6 +236,7 @@ const MapHome = () => {
       setWalkRoute({ lines: [{ type: 'WALK', path: [startPoint, endPoint] }], info: { distance: walkDist, duration: walkTime } });
     }
 
+    // 자동차
     let fetchedCarRoute = null;
     try {
       const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_KEY;
@@ -230,6 +252,7 @@ const MapHome = () => {
     } catch (e) { console.error("자동차 경로 에러", e); }
     setCarRoute(fetchedCarRoute);
 
+    // 대중교통
     let fetchedTransitPaths = [];
     try {
       const ODSAY_KEY = import.meta.env.VITE_ODSAY_KEY;
@@ -327,6 +350,8 @@ const MapHome = () => {
   return (
     <main className="map-page page app-bg">
       <div className="container map-layout">
+        
+        {/* === 좌측 사이드바 === */}
         <div className="map-sidebar card">
           <h2 className="sidebar-title">장소 검색 & 길찾기</h2>
           <form className="search-form" onSubmit={searchPlaces}>
@@ -338,14 +363,15 @@ const MapHome = () => {
             <div className="search-results">
               {places.map((place, idx) => (
                 <div key={idx} className={`place-item ${selectedPlace?.name === place.place_name ? 'selected' : ''}`} onClick={() => handleSelectPlace(place)}>
-                  <div className="place-info"><strong>{place.place_name}
-                    <button 
-                        onClick={(e) => handleToggleStar(place.place_name, parseFloat(place.y), parseFloat(place.x), place.road_address_name || place.address_name, e)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', color: isFavoritePlace(place.place_name) ? '#FFD700' : '#CCC' }}
-                      >
+                  <div className="place-info">
+                    <strong>{place.place_name}
+                      <button onClick={(e) => handleToggleStar(place.place_name, parseFloat(place.y), parseFloat(place.x), place.road_address_name || place.address_name, e)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', color: isFavoritePlace(place.place_name) ? '#FFD700' : '#CCC' }}>
                         {isFavoritePlace(place.place_name) ? '⭐' : '☆'}
                       </button>
-                      </strong><span className="address">{place.road_address_name || place.address_name}</span></div>
+                    </strong>
+                    <span className="address">{place.road_address_name || place.address_name}</span>
+                  </div>
                   <div className="place-actions">
                     <button onClick={(e) => handleSetPoint(place, 'START', e)} className="btn-set start">출발지</button>
                     <button onClick={(e) => handleSetPoint(place, 'END', e)} className="btn-set end">도착지</button>
@@ -359,15 +385,8 @@ const MapHome = () => {
             <div className="route-point"><span className="badge start-badge">출발</span><span>{startPoint ? startPoint.name : '설정되지 않음'}</span></div>
             <div className="route-point"><span className="badge end-badge">도착</span><span>{endPoint ? endPoint.name : '설정되지 않음'}</span>
               {endPoint && (
-                <button 
-                  onClick={(e) => handleToggleStar(endPoint.name, endPoint.lat, endPoint.lng, endPoint.address, e)}
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    fontSize: '1.2rem', marginLeft: '8px',
-                    color: isFavoritePlace(endPoint.name) ? '#FFD700' : '#CCC'
-                  }}
-                  title="즐겨찾기 추가/해제"
-                >
+                <button onClick={(e) => handleToggleStar(endPoint.name, endPoint.lat, endPoint.lng, endPoint.address, e)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', marginLeft: '8px', color: isFavoritePlace(endPoint.name) ? '#FFD700' : '#CCC' }} title="즐겨찾기 추가/해제">
                   {isFavoritePlace(endPoint.name) ? '⭐' : '☆'}
                 </button>
               )}
@@ -385,13 +404,11 @@ const MapHome = () => {
                   <button className={`tab-btn ${activeTab === 'WALK' ? 'active' : ''}`} onClick={() => setActiveTab('WALK')}>🚶 도보</button>
                 </div>
                 <div className="tab-content">
-                  {/* ... 기존 자동차/도보/대중교통 렌더링 코드 유지 (이전과 동일) ... */}
                   {activeTab === 'CAR' && (
                     carRoute ? (
                       <div className="route-summary"><div className="summary-item time">예상 {formatTime(carRoute.info.duration)}</div><div className="summary-item dist">총 거리 {formatDistance(carRoute.info.distance)}</div></div>
                     ) : <div className="no-route">자동차 경로가 없습니다.</div>
                   )}
-
                   {activeTab === 'WALK' && (
                     walkRoute ? (
                       <div className="route-summary walk">
@@ -400,7 +417,6 @@ const MapHome = () => {
                       </div>
                     ) : <div className="no-route">도보 경로를 계산할 수 없습니다.</div>
                   )}
-
                   {activeTab === 'TRANSIT' && (
                     transitRoutes.length > 0 ? (
                       <div className="transit-routes-container">
@@ -455,57 +471,50 @@ const MapHome = () => {
           </div>
         </div>
 
-        <div className="map-container card">
+        {/* === 우측 지도 컨테이너 === */}
+        {/* 🌟 ref={mapWrapperRef} 가 짤림 방지의 핵심입니다 */}
+        <div className="map-container card" ref={mapWrapperRef}>
           {isLoading ? (
             <div className="map-loading">지도를 불러오는 중입니다...</div>
           ) : (
-            <Map center={center} style={{ width: "100%", height: "100%", display: "block", borderRadius: "20px" }} level={5}>
-              {/* 🌟 추가: 현재 도착지가 LocaPick 추천 결과 중 하나인지 확인 */}
+            <Map 
+              center={center} 
+              style={{ width: "100%", height: "100%", display: "block", borderRadius: "20px" }} 
+              level={5}
+              onCreate={setMapInstance} // 🌟 지도 생성 시 인스턴스 저장
+            >
               {(() => {
                 const isLocaDest = endPoint && locaResults.some(place => place.name === endPoint.name);
 
                 return (
                   <React.Fragment>
-                    {/* 1. 출발지 마커 & 커스텀 라벨 */}
                     {startPoint && (
                       <React.Fragment>
                         <MapMarker position={startPoint} image={{ src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', size: { width: 34, height: 39 }}} />
                         <CustomOverlayMap position={startPoint} xAnchor={0.5} yAnchor={2.2} zIndex={10}>
-                          <div className="custom-marker-label start">
-                            <span className="badge">출발</span>
-                            <span className="name">{startPoint.name}</span>
-                          </div>
+                          <div className="custom-marker-label start"><span className="badge">출발</span><span className="name">{startPoint.name}</span></div>
                         </CustomOverlayMap>
                       </React.Fragment>
                     )}
 
-                    {/* 2. 도착지 마커 & 커스텀 라벨 (LocaPick 목적지가 아닐 때만 표시!) */}
                     {endPoint && !isLocaDest && (
                       <React.Fragment>
                         <MapMarker position={endPoint} />
                         <CustomOverlayMap position={endPoint} xAnchor={0.5} yAnchor={2.2} zIndex={10}>
-                          <div className="custom-marker-label end">
-                            <span className="badge">도착</span>
-                            <span className="name">{endPoint.name}</span>
-                          </div>
+                          <div className="custom-marker-label end"><span className="badge">도착</span><span className="name">{endPoint.name}</span></div>
                         </CustomOverlayMap>
                       </React.Fragment>
                     )}
 
-                    {/* 3. 일반 선택 위치 마커 */}
                     {selectedPlace && (
                       <React.Fragment>
                         <MapMarker position={selectedPlace} />
                         <CustomOverlayMap position={selectedPlace} xAnchor={0.5} yAnchor={2.2} zIndex={5}>
-                          <div className="custom-marker-label selected">
-                            <span className="badge">✅</span>
-                            <span className="name">{selectedPlace.name}</span>
-                          </div>
+                          <div className="custom-marker-label selected"><span className="badge">✅</span><span className="name">{selectedPlace.name}</span></div>
                         </CustomOverlayMap>
                       </React.Fragment>
                     )}
 
-                    {/* 4. 경로 선 그리기 */}
                     {activeLines.map((line, idx) => {
                       let color = '#8b5cf6'; let style = 'solid'; let weight = 6; let opacity = 0.8;
                       if (line.type === 'WALK') { color = '#64748b'; style = 'shortdash'; weight = 4; opacity = 0.9; } 
@@ -514,30 +523,14 @@ const MapHome = () => {
                       return (<Polyline key={idx} path={line.path} strokeWeight={weight} strokeColor={color} strokeOpacity={opacity} strokeStyle={style} />);
                     })}
 
-                    {/* 🌟 5. LOCAPICK 마커 및 오버레이 */}
                     {locaResults.map((place, idx) => {
                       const isSelectedDest = endPoint && endPoint.name === place.name;
-
                       return (
                         <React.Fragment key={`locapick-${idx}`}>
-                          <MapMarker
-                            position={{ lat: parseFloat(place.lat), lng: parseFloat(place.lng) }}
-                            image={{ src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png', size: { width: 24, height: 35 } }}
-                            onClick={() => handleSelectLocaPlace(place)}
-                          />
-                          
-                          <CustomOverlayMap
-                            position={{ lat: parseFloat(place.lat), lng: parseFloat(place.lng) }}
-                            xAnchor={0.5} yAnchor={2.2}
-                            zIndex={isSelectedDest ? 15 : 10} // 도착지로 선택되면 가장 위로 올림
-                          >
-                            <div 
-                              className={`custom-marker-label loca ${isSelectedDest ? 'is-dest' : ''}`} 
-                              onClick={() => handleSelectLocaPlace(place)}
-                            >
-                              <span className="rank">{idx + 1}위</span>
-                              <span className="name">{place.name}</span>
-                              {/* 🌟 선택된 목적지일 경우 말풍선 안에 도착지 뱃지 추가 */}
+                          <MapMarker position={{ lat: parseFloat(place.lat), lng: parseFloat(place.lng) }} image={{ src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png', size: { width: 24, height: 35 } }} onClick={() => handleSelectLocaPlace(place)} />
+                          <CustomOverlayMap position={{ lat: parseFloat(place.lat), lng: parseFloat(place.lng) }} xAnchor={0.5} yAnchor={2.2} zIndex={isSelectedDest ? 15 : 10}>
+                            <div className={`custom-marker-label loca ${isSelectedDest ? 'is-dest' : ''}`} onClick={() => handleSelectLocaPlace(place)}>
+                              <span className="rank">{idx + 1}위</span><span className="name">{place.name}</span>
                               {isSelectedDest && <span className="dest-badge">도착지</span>}
                             </div>
                           </CustomOverlayMap>
@@ -550,50 +543,30 @@ const MapHome = () => {
            </Map>
           )}
 
-          {/* 🌟 LOCAPICK: 플로팅 버튼 (우측 하단) */}
+          {/* LOCAPICK 버튼 & 모달 */}
           <button className="locapick-fab" onClick={() => setIsLocapickOpen(true)}>
             <span className="icon">✨</span> LOCAPICK
           </button>
 
-          {/* 🌟 LOCAPICK: 설정 및 결과 모달창 */}
           {isLocapickOpen && (
             <div className="locapick-modal-overlay" onClick={() => setIsLocapickOpen(false)}>
               <div className="locapick-modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                  <h3>✨ LocaPick 알고리즘</h3>
-                  <button className="close-btn" onClick={() => setIsLocapickOpen(false)}>✕</button>
-                </div>
-
+                <div className="modal-header"><h3>✨ LocaPick 알고리즘</h3><button className="close-btn" onClick={() => setIsLocapickOpen(false)}>✕</button></div>
                 <div className="modal-body">
-                  <div className="settings-group">
-                    <label>탐색 카테고리</label>
-                    <div className="radio-group">
-                      <button className={`radio-btn ${locaCategory === 'restaurant' ? 'active' : ''}`} onClick={() => setLocaCategory('restaurant')}>🍔 음식점</button>
-                      <button className={`radio-btn ${locaCategory === 'clothes' ? 'active' : ''}`} onClick={() => setLocaCategory('clothes')}>👕 옷가게</button>
-                    </div>
-                  </div>
-
-                  <div className="settings-group">
-                    <label>최대 소요 시간 (도보 기준)</label>
-                    <div className="input-wrap">
-                      <input type="number" min="1" max="120" value={locaTime} onChange={(e) => setLocaTime(Number(e.target.value))} />
-                      <span className="unit">분 이내</span>
-                    </div>
-                  </div>
-
-                  <div className="settings-group">
-                    <label>원하는 가게 수 (최대 5개)</label>
-                    <div className="input-wrap">
-                      <input type="number" min="1" max="5" value={locaCount} onChange={(e) => setLocaCount(Math.min(5, Number(e.target.value)))} />
-                      <span className="unit">개 추천</span>
-                    </div>
-                  </div>
-
+                  <div className="settings-group"><label>탐색 카테고리</label><div className="radio-group">
+                    <button className={`radio-btn ${locaCategory === 'restaurant' ? 'active' : ''}`} onClick={() => setLocaCategory('restaurant')}>🍔 음식점</button>
+                    <button className={`radio-btn ${locaCategory === 'clothes' ? 'active' : ''}`} onClick={() => setLocaCategory('clothes')}>👕 옷가게</button>
+                  </div></div>
+                  <div className="settings-group"><label>최대 소요 시간 (도보 기준)</label><div className="input-wrap">
+                    <input type="number" min="1" max="120" value={locaTime} onChange={(e) => setLocaTime(Number(e.target.value))} /><span className="unit">분 이내</span>
+                  </div></div>
+                  <div className="settings-group"><label>원하는 가게 수 (최대 5개)</label><div className="input-wrap">
+                    <input type="number" min="1" max="5" value={locaCount} onChange={(e) => setLocaCount(Math.min(5, Number(e.target.value)))} /><span className="unit">개 추천</span>
+                  </div></div>
                   <button className="run-algo-btn" onClick={runLocapickAlgorithm} disabled={isLocaLoading}>
                     {isLocaLoading ? '최적의 장소 찾는 중...' : '알고리즘 실행'}
                   </button>
 
-                  {/* 추천 결과 리스트 */}
                   {locaResults.length > 0 && (
                     <div className="loca-results">
                       <h4>💡 추천 결과 ({locaResults.length}개)</h4>
@@ -602,12 +575,9 @@ const MapHome = () => {
                           <div key={idx} className="loca-card" onClick={() => handleSelectLocaPlace(place)}>
                             <div className="card-header">
                               <span className="rank">{idx + 1}위</span>
-                              <strong>
-                                {place.name}
-                                <button 
-                                  onClick={(e) => handleToggleStar(place.name, place.lat, place.lng, place.address, e)}
-                                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', marginLeft: '5px', color: isFavoritePlace(place.name) ? '#FFD700' : '#CCC' }}
-                                >
+                              <strong>{place.name}
+                                <button onClick={(e) => handleToggleStar(place.name, place.lat, place.lng, place.address, e)}
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', marginLeft: '5px', color: isFavoritePlace(place.name) ? '#FFD700' : '#CCC' }}>
                                   {isFavoritePlace(place.name) ? '⭐' : '☆'}
                                 </button>
                               </strong>
@@ -627,7 +597,6 @@ const MapHome = () => {
               </div>
             </div>
           )}
-
         </div>
       </div>
     </main>

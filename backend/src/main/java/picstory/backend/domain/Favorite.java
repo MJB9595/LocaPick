@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 
 @Entity
 @Getter
@@ -35,6 +36,14 @@ public class Favorite {
 
     private String address;
 
+    // 카테고리 저장용
+    @Column(nullable = false)
+    private String category = "uncategorized";
+
+    // 주차혼잡도 0 1 2 보통 여유 혼잡
+    @Column(nullable = false)
+    private Integer parkingStatus;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -46,5 +55,10 @@ public class Favorite {
         this.lat = lat;
         this.lng = lng;
         this.address = address;
+        this.parkingStatus = new Random().nextInt(3);
+    }
+
+    public void updateCategory(String category) {
+        this.category = category;
     }
 }

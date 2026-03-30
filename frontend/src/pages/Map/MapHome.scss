@@ -25,7 +25,7 @@
 
   @include mobile {
     flex: none; width: 100%; max-height: none; gap: $space-md; padding: $space-lg $space-md; 
-    .sidebar-title { margin-bottom: 4px; }
+    .sidebar-title { margin-bottom: 4px; font-size: 1.1rem; /* 🌟 모바일 폰트 조정 */ }
   }
 }
 
@@ -37,12 +37,20 @@
     border-radius: $r-sm; font-weight: $fw-bold; cursor: pointer; transition: background $ease;
     &:hover { background: darken($purple-2, 10%); }
   }
+  
+  @include mobile {
+    .search-input { height: 40px; font-size: 14px; }
+    .search-btn { padding: 0 12px; font-size: 14px; }
+  }
 }
 
 .search-results {
   flex-shrink: 0; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; margin-bottom: 8px;
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-thumb { background: $line; border-radius: 4px; }
+  
+  @include mobile { max-height: 200px; /* 🌟 모바일에서 스크롤 너무 길어지지 않게 방지 */ }
+
   .place-item {
     background: #ffffff; border: 1px solid $line; border-radius: $r-sm; padding: 12px; cursor: pointer; transition: all 0.2s; box-shadow: $shadow-sm;
     &:hover { background: rgba(139, 92, 246, 0.05); }
@@ -69,6 +77,7 @@
       &.start-badge { background: $success; }
       &.end-badge { background: $purple-2; }
     }
+    @include mobile { font-size: 13px; }
   }
 
   // 통합 길찾기 버튼
@@ -77,6 +86,7 @@
     font-size: $text-md; font-weight: 800; cursor: pointer; box-shadow: $shadow-sm; transition: all $ease;
     &:hover:not(:disabled) { background: $purple-2; transform: translateY(-2px); }
     &:disabled { background: $line; color: $muted; cursor: not-allowed; box-shadow: none; transform: none; }
+    @include mobile { padding: 14px 0; font-size: 15px; }
   }
 }
 
@@ -91,6 +101,13 @@
     flex: 1; padding: 10px 0; background: transparent; border: none; border-radius: 6px; font-size: 13px; font-weight: 800; color: $muted; cursor: pointer; transition: all 0.2s;
     &:hover { color: $fg; }
     &.active { background: #ffffff; color: $purple-2; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  }
+  
+  @include mobile {
+    /* 🌟 모바일에서 탭이 너무 좁아지면 가로 스크롤 되도록 보호 */
+    flex-wrap: nowrap; overflow-x: auto; white-space: nowrap;
+    &::-webkit-scrollbar { display: none; }
+    .tab-btn { font-size: 12px; padding: 8px 4px; }
   }
 }
 
@@ -112,18 +129,16 @@
 }
 
 /* ─── 대중교통 리스트 및 상세 타임라인 ─── */
-/* ─── 대중교통 리스트 및 상세 타임라인 ─── */
 .transit-routes-container {
   .transit-list { 
     display: flex; 
     flex-direction: column; 
     gap: 10px; 
-    /* 🌟 높이 제한(max-height)과 내부 스크롤(overflow-y) 삭제 -> 사이드바 전체 스크롤 활용 */
     padding-right: 4px;
   }
   
   .transit-card {
-    flex-shrink: 0; /* 🌟 핵심: 공간이 부족해도 카드가 납작하게 찌그러지지 않도록 방지 */
+    flex-shrink: 0; 
     background: #ffffff; 
     border: 1px solid $line; 
     border-radius: $r-sm; 
@@ -153,9 +168,16 @@
         }
         .badge-arrow { color: $muted; font-size: 11px; opacity: 0.6; }
       }
+      
+      @include mobile {
+        padding: 12px;
+        .header-left { .time { font-size: 1.2rem; } .fare { font-size: 12px; } }
+        .header-right .summary-badges { gap: 4px; .transit-badge { padding: 3px 6px; font-size: 11px; } }
+      }
     }
   }
 }
+
 .route-details-wrap.inline {
   border-top: 1px dashed $line; padding: 14px; background: rgba(34, 197, 94, 0.03);
   .details-list { display: flex; flex-direction: column; gap: 8px; }
@@ -182,6 +204,8 @@
       .step-stations { margin-top: 4px; color: $fg; .arrow { color: $purple-2; font-weight: bold; margin: 0 4px; } .step-meta { color: $muted; font-size: 11px; margin-left: 6px; } }
     }
   }
+  
+  @include mobile { padding: 10px; .detail-item { padding: 8px; gap: 8px; .step-icon { font-size: 1rem; } .step-text strong { font-size: 13px; } } }
 }
 
 /* ─── 지도 영역 ─── */
@@ -222,8 +246,9 @@
   @include mobile {
     bottom: 20px;
     right: 20px;
-    padding: 14px 20px;
+    padding: 12px 18px;
     font-size: 0.9rem;
+    box-shadow: 0 4px 16px rgba(236, 72, 153, 0.4);
   }
 }
 
@@ -238,6 +263,8 @@
   justify-content: center;
   align-items: center;
   padding: 20px;
+  
+  @include mobile { padding: 16px; }
 }
 
 /* 모달 컨텐츠 박스 */
@@ -255,15 +282,22 @@
   &::-webkit-scrollbar { width: 6px; }
   &::-webkit-scrollbar-thumb { background: $line; border-radius: 4px; }
 
+  @include mobile {
+    max-height: 85vh; /* 🌟 모바일 화면을 뚫지 않도록 제한 */
+  }
+
   .modal-header {
     display: flex; justify-content: space-between; align-items: center;
     padding: 20px; border-bottom: 1px solid $line;
     h3 { margin: 0; font-size: 1.2rem; font-weight: 900; color: transparent; background: linear-gradient(135deg, #8b5cf6, #ec4899); -webkit-background-clip: text; }
     .close-btn { background: transparent; border: none; font-size: 1.5rem; color: $muted; cursor: pointer; &:hover { color: $fg; } }
+    
+    @include mobile { padding: 16px; h3 { font-size: 1.1rem; } }
   }
 
   .modal-body {
     padding: 20px; display: flex; flex-direction: column; gap: 20px;
+    @include mobile { padding: 16px; gap: 16px; }
   }
 
   /* 설정 그룹 */
@@ -282,6 +316,12 @@
       input { flex: 1; padding: 12px; border: 1px solid $line; border-radius: $r-sm; font-size: 1rem; text-align: center; font-weight: bold; color: $purple-2; outline: none; &:focus { border-color: $purple-2; } }
       .unit { font-size: 0.9rem; color: $muted; font-weight: bold; width: 60px; }
     }
+    
+    @include mobile {
+      label { font-size: 0.85rem; }
+      .radio-group .radio-btn { padding: 10px; font-size: 0.9rem; }
+      .input-wrap input { padding: 10px; font-size: 0.9rem; }
+    }
   }
 
   .run-algo-btn {
@@ -290,6 +330,8 @@
     font-size: 1.1rem; font-weight: 900; cursor: pointer; box-shadow: $shadow-sm; transition: 0.2s;
     &:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(236, 72, 153, 0.4); }
     &:disabled { background: $muted; cursor: not-allowed; transform: none; box-shadow: none; }
+    
+    @include mobile { padding: 14px; font-size: 1rem; }
   }
 
   /* 추천 결과 디자인 */
@@ -315,6 +357,12 @@
       .card-address { font-size: 0.8rem; color: $muted; margin-bottom: 12px; line-height: 1.4; }
       .set-dest-btn { width: 100%; padding: 10px; background: white; border: 1px solid $purple-2; color: $purple-2; border-radius: 4px; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: 0.2s;
         &:hover { background: $purple-2; color: white; }
+      }
+      
+      @include mobile {
+        padding: 12px;
+        .card-header strong { font-size: 1rem; }
+        .card-scores .score { font-size: 0.8rem; padding: 3px 6px; }
       }
     }
   }
@@ -348,12 +396,11 @@
     font-size: 0.85rem; 
     font-weight: 800; 
     color: #333; 
-    /* 글자가 길면 '...' 으로 예쁘게 자르기 */
-    display: block; // 블록 요소로 변경
-    overflow: hidden; // 넘어가는 글자 숨기기
-    text-overflow: ellipsis; // 말줄임표(...) 생성
-    white-space: nowrap; // 줄바꿈 방지
-    flex: 1; // 이름 영역이 남은 공간을 유연하게 차지하도록 설정
+    display: block; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    white-space: nowrap; 
+    flex: 1; 
   }
 
   /* 배지(출발, 도착, 순위) 공통 스타일 */
@@ -389,10 +436,9 @@
     .rank { background: linear-gradient(135deg, #8b5cf6, #ec4899); }
     &:hover { border-color: #ec4899; }
     
-    /* 🌟 LocaPick이 목적지로 선택되었을 때 추가되는 뱃지 */
     .dest-badge {
       margin-left: 8px;
-      background: #8b5cf6; // 보라색으로 강조
+      background: #8b5cf6;
       color: white;
       font-size: 0.75rem;
       font-weight: 900;
@@ -401,11 +447,19 @@
       box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
     }
 
-    /* 목적지로 선택된 상태일 때 말풍선 테두리 강조 (반투명 해제!) */
     &.is-dest {
       border-color: #8b5cf6; 
       border-width: 2px;
       box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
     }
+  }
+  
+  @include mobile {
+    /* 🌟 모바일에서는 말풍선이 지도를 너무 가리지 않도록 크기 다이어트 */
+    max-width: 160px;
+    padding: 3px 8px 3px 3px;
+    .name { font-size: 0.75rem; }
+    .badge, .rank { font-size: 0.65rem; padding: 3px 6px; margin-right: 4px; }
+    .loca .dest-badge { font-size: 0.65rem; padding: 2px 6px; }
   }
 }

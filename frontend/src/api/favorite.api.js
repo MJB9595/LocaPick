@@ -8,3 +8,7 @@ export const getMyFavorites = () =>
 // 즐겨찾기 추가/삭제 (Toggle)
 export const toggleFavorite = (placeData) => 
   client.post('/favorites/toggle', placeData).then((r) => r.data);
+
+// 카테고리 업데이트 통신
+export const updateFavoriteCategory = (id, category) => 
+  client.patch(`/favorites/${id}/category`, { category }).then((r) => r.data);

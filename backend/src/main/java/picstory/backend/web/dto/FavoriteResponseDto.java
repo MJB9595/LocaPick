@@ -14,6 +14,8 @@ public class FavoriteResponseDto {
     private Double lat;
     private Double lng;
     private String address;
+    private String category;
+    private Integer parkingStatus;
     private LocalDateTime createdAt;
 
     // Entity를 DTO로 변환하는 마법의 메서드
@@ -24,6 +26,8 @@ public class FavoriteResponseDto {
                 .lat(favorite.getLat())
                 .lng(favorite.getLng())
                 .address(favorite.getAddress())
+                .category(favorite.getCategory())
+                .parkingStatus(favorite.getParkingStatus())
                 .createdAt(favorite.getCreatedAt())
                 .build();
     }

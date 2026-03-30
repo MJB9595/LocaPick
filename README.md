@@ -74,10 +74,9 @@
 
 ## 📸 스크린샷 (Screenshots)
 
-| 메인 지도 & 길찾기 | LocaPick 추천 알고리즘 | 나만의 장소 메모장 |
-| :---: | :---: | :---: |
-| <img src="" width="250"/> | <img src="[로카픽스크린샷_URL]" width="250"/> | <img src="[메모장스크린샷_URL]" width="250"/> |
-
+| 메인 지도 & 길찾기 | LocaPick 추천 알고리즘 |
+| :---: | :---: |
+| <img width="250" alt="Image" src="https://github.com/user-attachments/assets/0c8d182c-e43e-4b16-b39c-ba5f5c87f2e9" /> | <img width="250" alt="Image" src="https://github.com/user-attachments/assets/ba72cf3d-0e84-49e6-a85b-37a2c8a51e3b" /> |
 <br>
 
 ## 🚀 시작하기 (Getting Started)

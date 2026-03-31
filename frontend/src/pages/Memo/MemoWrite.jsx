@@ -14,7 +14,8 @@ const MemoWrite = () => {
   const [content, setContent] = useState(''); // 에디터의 HTML 내용이 저장됨
   const [category, setCategory] = useState('DAILY');
 
-  // 🌟 핵심: 에디터에서 사진 버튼을 눌렀을 때의 동작 가로채기
+  // src/pages/Memo/MemoWrite.jsx 내부의 imageHandler 함수 수정
+
   const imageHandler = () => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
@@ -25,17 +26,28 @@ const MemoWrite = () => {
       const file = input.files[0];
       if (file) {
         try {
-          // 1. 방금 만든 백엔드 DB 저장 API 호출
+          // 1. 서버에 업로드
           const res = await uploadPostImage(file);
-          const imageUrl = res.url; // 서버가 돌려준 URL (예: /api/images/1)
+          const imageUrl = res.url;
 
-          // 2. 에디터 커서 위치에 이미지 태그(<img src="/api/images/1">) 삽입
+          // 2. 에디터 인스턴스 가져오기
           const editor = quillRef.current.getEditor();
+          
+          // 3. 현재 커서 위치(선택 영역) 가져오기
           const range = editor.getSelection();
-          editor.insertEmbed(range.index, 'image', imageUrl);
+          
+          // range가 null이면 글의 맨 끝(editor.getLength())에 삽입
+          const index = range ? range.index : editor.getLength();
+
+          // 4. 이미지 삽입
+          editor.insertEmbed(index, 'image', imageUrl);
+          
+          // 5. 삽입 후 커서를 이미지 다음으로 이동 (사용자 편의)
+          editor.setSelection(index + 1);
+
         } catch (error) {
-          console.error(error);
-          alert('이미지 서버 업로드에 실패했습니다.');
+          console.error('이미지 업로드 실패:', error);
+          alert('이미지 업로드에 실패했습니다.');
         }
       }
     });

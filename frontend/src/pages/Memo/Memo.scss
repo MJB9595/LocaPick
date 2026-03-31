@@ -250,3 +250,12 @@
     .right-btns { display: flex; }
   }
 }
+
+.w-input:focus::placeholder {
+  color: transparent;
+}
+
+/* 에디터가 포커스(focus-within)를 받았을 때, 내용이 비어있는 상태(ql-blank)의 placeholder를 숨김 */
+.editor-container:focus-within .ql-editor.ql-blank::before {
+  display: none !important;
+}

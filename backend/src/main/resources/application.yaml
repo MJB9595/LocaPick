@@ -38,7 +38,7 @@ management:
       show-details: always
 # ─── Kakao API ────────────────────────────────────────────────
 kakao:
-  rest-key: ${KAKAO_REST_KEY:d0d3b335c07afc61d7c86e2807ff89f3}
+  rest-api-key: ${KAKAO_REST_KEY:default_key_if_missing}
 
 app:
   upload:

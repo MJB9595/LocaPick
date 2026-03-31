@@ -1,6 +1,8 @@
 package picstory.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import picstory.backend.domain.Favorite;
 import java.util.List;
 
@@ -13,4 +15,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     
     // 이름으로 즐겨찾기 삭제
     void deleteByMemberIdAndPlaceName(Long memberId, String placeName);
+
+    @Query("SELECT DISTINCT f.category FROM Favorite f WHERE f.member.id = :memberId")
+    List<String> findMyUniqueCategories(@Param("memberId") Long memberId);
 }

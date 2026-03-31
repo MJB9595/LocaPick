@@ -264,13 +264,13 @@
   }
 }
 
-/* 모달 오버레이 배경 */
+/* 🌟 수정: 모달 오버레이 배경 (fixed로 변경하여 스크롤 잘림 해결) */
 .locapick-modal-overlay {
-  position: absolute;
+  position: fixed; /* absolute -> fixed 변경 */
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
-  z-index: 200;
+  z-index: 9999; /* 지도나 다른 요소들보다 무조건 최상단에 오도록 높임 */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -287,6 +287,7 @@
   max-width: 400px;
   max-height: 90%;
   overflow-y: auto;
+  overscroll-behavior: contain; /* 🌟 수정: 모달창 안에서 스크롤 시 배경(지도)이 스크롤되는 현상 차단 */
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
@@ -295,12 +296,13 @@
   &::-webkit-scrollbar-thumb { background: $line; border-radius: 4px; }
 
   @include mobile {
-    max-height: 85vh; /* 🌟 모바일 화면을 뚫지 않도록 제한 */
+    max-height: 85vh; 
   }
 
   .modal-header {
     display: flex; justify-content: space-between; align-items: center;
     padding: 20px; border-bottom: 1px solid $line;
+    flex-shrink: 0; /* 헤더 영역 고정 */
     h3 { margin: 0; font-size: 1.2rem; font-weight: 900; color: transparent; background: linear-gradient(135deg, #8b5cf6, #ec4899); -webkit-background-clip: text; }
     .close-btn { background: transparent; border: none; font-size: 1.5rem; color: $muted; cursor: pointer; &:hover { color: $fg; } }
     
@@ -309,7 +311,7 @@
 
   .modal-body {
     padding: 20px; display: flex; flex-direction: column; gap: 20px;
-    @include mobile { padding: 16px; gap: 16px; }
+    @include mobile { padding: 16px; gap: 16px; padding-bottom: 30px; /* 🌟 하단 여백을 충분히 주어 3위 항목이 안 잘리게 함 */ }
   }
 
   /* 설정 그룹 */
@@ -356,10 +358,22 @@
       background: rgba(139, 92, 246, 0.03); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: $r-sm; padding: 16px; cursor: pointer; transition: 0.2s;
       &:hover { background: #ffffff; border-color: $purple-2; box-shadow: 0 4px 16px rgba(139, 92, 246, 0.15); transform: translateY(-2px); }
       
-      .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
-        .rank { background: #ec4899; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 900; }
-        strong { font-size: 1.1rem; color: $fg; }
+      /* 🌟 수정: 헤더 레이아웃 (순위 뱃지 찌그러짐 방지) */
+      .card-header { 
+        display: flex; align-items: flex-start; /* 가게 이름이 길면 위로 맞춰지도록 */
+        gap: 10px; margin-bottom: 8px;
+        .rank { 
+          flex-shrink: 0; /* 🌟 핵심: 공간이 부족해도 뱃지가 절대 찌그러지지 않게 방어 */
+          margin-top: 2px; /* 텍스트 라인에 예쁘게 맞춤 */
+          background: #ec4899; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 900; 
+        }
+        strong { 
+          flex: 1; /* 남은 공간을 이름이 모두 차지하게 함 */
+          font-size: 1.1rem; color: $fg; line-height: 1.4; word-break: keep-all; 
+          display: flex; align-items: flex-start; 
+        }
       }
+
       .card-scores { display: flex; gap: 12px; margin-bottom: 8px;
         .score { font-size: 0.85rem; font-weight: 800; padding: 4px 8px; border-radius: 4px; background: white;
           &.review { color: #f59e0b; border: 1px solid #fde68a; }
@@ -379,6 +393,8 @@
     }
   }
 }
+
+/* ... 하단 커스텀 오버레이 코드는 기존 유지 ... */
 
 /* ─── 🌟 커스텀 오버레이 (지도 위 통합 마커 라벨) ─── */
 .custom-marker-label {

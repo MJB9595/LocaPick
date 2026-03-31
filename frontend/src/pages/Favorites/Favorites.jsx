@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMyFavorites, toggleFavorite, updateFavoriteCategory } from '../../api/favorite.api'; // 🌟 추가
+// 🌟 getMyTags 추가
+import { getMyFavorites, toggleFavorite, updateFavoriteCategory, getMyTags } from '../../api/favorite.api'; 
+import { useAuth } from '../../store/auth.store'; // 🌟 현재 유저 정보 가져오기 추가
 import './Favorites.scss';
 
 const DEFAULT_CATEGORIES = [
@@ -14,6 +16,10 @@ const DEFAULT_CATEGORIES = [
 
 const Favorites = () => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // 🌟 현재 로그인한 유저 정보
+
+  // 🌟 핵심 1: 유저의 이메일(또는 ID)을 덧붙여 개인 전용 로컬 스토리지 키 생성!
+  const storageKey = `locapick_custom_tags_${user?.email || 'guest'}`;
 
   const [favorites, setFavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,10 +29,10 @@ const Favorites = () => {
   const [showManageModal, setShowManageModal] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
-  // 커스텀 카테고리 목록은 UI 정보이므로 로컬 스토리지 유지
+  // 커스텀 카테고리 초기화 (개인 전용 키 사용)
   const [customCategories, setCustomCategories] = useState(() => {
     try {
-      const saved = localStorage.getItem('locapick_custom_categories');
+      const saved = localStorage.getItem(storageKey);
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
@@ -41,24 +47,50 @@ const Favorites = () => {
     DEFAULT_CATEGORIES[DEFAULT_CATEGORIES.length - 1], 
   ];
 
-  const fetchFavorites = async () => {
+  // 🌟 핵심 2: 즐겨찾기 목록과 내 태그(DB)를 동시에 불러오기
+  const fetchInitialData = async () => {
     try {
-      const data = await getMyFavorites();
-      setFavorites(data);
+      setIsLoading(true);
+      const [favData, dbTags] = await Promise.all([
+        getMyFavorites(),
+        getMyTags() // 백엔드에서 오직 '나만의' 유니크 태그 문자열 리스트 가져오기
+      ]);
+      setFavorites(favData);
+
+      // 🌟 다른 기기(모바일 등)에서 로그인했을 때 DB 데이터를 바탕으로 태그 자동 복구
+      const defaultIds = DEFAULT_CATEGORIES.map(c => c.id);
+      const existingCustomIds = customCategories.map(c => c.id);
+
+      const recoveredTags = dbTags
+        .filter(tag => !defaultIds.includes(tag) && !existingCustomIds.includes(tag) && tag !== 'all')
+        .map(tag => ({
+          id: tag,      // DB에 저장된 문자열 자체를 ID로 사용
+          name: tag,    
+          icon: '📌',   // 복구된 태그는 기본 아이콘 부여
+          color: 'uncategorized'
+        }));
+
+      if (recoveredTags.length > 0) {
+        setCustomCategories(prev => [...prev, ...recoveredTags]);
+      }
+
     } catch (error) {
-      console.error('즐겨찾기를 불러오는 중 오류 발생:', error);
+      console.error('데이터를 불러오는 중 오류 발생:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // 컴포넌트 마운트 시 데이터 로드
   useEffect(() => {
-    fetchFavorites();
-  }, []);
+    fetchInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey]);
 
+  // 커스텀 태그가 변경될 때마다 내 개인 스토리지에만 저장
   useEffect(() => {
-    localStorage.setItem('locapick_custom_categories', JSON.stringify(customCategories));
-  }, [customCategories]);
+    localStorage.setItem(storageKey, JSON.stringify(customCategories));
+  }, [customCategories, storageKey]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -70,11 +102,9 @@ const Favorites = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 🌟 핵심: 카테고리 변경 시 백엔드 DB 연동!
   const handleCategoryChange = async (favId, categoryId) => {
     try {
       await updateFavoriteCategory(favId, categoryId);
-      // 성공하면 로컬 state도 업데이트하여 화면 즉시 반영
       setFavorites(prev => prev.map(fav => fav.id === favId ? { ...fav, category: categoryId } : fav));
     } catch (error) {
       alert("카테고리 변경에 실패했습니다.");
@@ -102,14 +132,19 @@ const Favorites = () => {
     if (!trimmed) return;
     if (allCategories.some(c => c.name === trimmed)) return alert('이미 같은 이름의 카테고리가 있습니다.');
 
-    setCustomCategories(prev => [...prev, { id: `custom_${Date.now()}`, name: trimmed, icon: newCategoryIcon || '📌', color: 'uncategorized' }]);
+    // 🌟 핵심 3: 아이디(id)를 랜덤 숫자가 아닌 '이름' 그 자체로 저장 (DB와 싱크를 맞추기 위함)
+    setCustomCategories(prev => [...prev, { 
+      id: trimmed, 
+      name: trimmed, 
+      icon: newCategoryIcon || '📌', 
+      color: 'uncategorized' 
+    }]);
     setNewCategoryName(''); setNewCategoryIcon('📌');
   };
 
   const handleDeleteCategory = async (catId) => {
     if (!window.confirm('이 카테고리를 삭제하시겠습니까?\n해당 카테고리의 장소들은 미분류로 이동합니다.')) return;
     
-    // DB에서 이 카테고리를 쓰던 애들을 모두 '미분류'로 업데이트
     const affectedFavs = favorites.filter(fav => fav.category === catId);
     for (const fav of affectedFavs) {
       await handleCategoryChange(fav.id, 'uncategorized');
@@ -139,10 +174,9 @@ const Favorites = () => {
     });
 
   const getCategoryInfo = (catId) => {
-    return allCategories.find(c => c.id === catId) || { id: catId, name: '미분류', icon: '📁', color: 'uncategorized' };
+    return allCategories.find(c => c.id === catId) || { id: catId, name: catId, icon: '📌', color: 'uncategorized' };
   };
 
-  // 주차 뱃지 렌더링 헬퍼 함수
   const renderParkingBadge = (status) => {
     if (status === 0) return <span className="parking-badge status-0">🟢 주차: 여유</span>;
     if (status === 1) return <span className="parking-badge status-1">🟡 주차: 보통</span>;
@@ -150,7 +184,7 @@ const Favorites = () => {
     return null;
   };
 
-  if (isLoading) return <main className="page app-bg"><div className="container favorites-page"><p style={{ paddingTop: '40px', color: '#999', textAlign: 'center' }}>즐겨찾기를 불러오는 중...</p></div></main>;
+  if (isLoading) return <main className="page app-bg"><div className="container favorites-page"><p style={{ paddingTop: '40px', color: '#999', textAlign: 'center' }}>데이터를 불러오는 중...</p></div></main>;
 
   return (
     <main className="page app-bg">
@@ -206,7 +240,6 @@ const Favorites = () => {
                   <div className="fav-card__header">
                     <div className="fav-card__name">
                       {fav.placeName}
-                      {/* 🌟 주차 뱃지 추가! */}
                       {renderParkingBadge(fav.parkingStatus)}
                     </div>
                     <div className="fav-card__actions">
@@ -242,7 +275,6 @@ const Favorites = () => {
           </div>
         )}
 
-        {/* 모달 코드는 기존과 동일하게 유지 */}
         {showManageModal && (
           <div className="modal-overlay" onClick={() => setShowManageModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>

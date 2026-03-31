@@ -89,4 +89,14 @@ public class FavoriteController {
         favorite.updateCategory(newCategory);
         return ResponseEntity.ok(Map.of("success", true, "message", "카테고리가 변경되었습니다."));
     }
+
+    @GetMapping("/tags")
+    public ResponseEntity<List<String>> getMyTags(Authentication auth) {
+        Long memberId = (Long) auth.getPrincipal();
+
+        // 내 아이디로 등록된 유니크한 카테고리 목록만 DB에서 가져오기
+        List<String> myTags = favoriteRepository.findMyUniqueCategories(memberId);
+
+        return ResponseEntity.ok(myTags);
+    }
 }

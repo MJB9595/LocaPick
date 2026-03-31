@@ -12,3 +12,6 @@ export const toggleFavorite = (placeData) =>
 // 카테고리 업데이트 통신
 export const updateFavoriteCategory = (id, category) => 
   client.patch(`/favorites/${id}/category`, { category }).then((r) => r.data);
+
+export const getMyTags = () => 
+  client.get('/favorites/tags').then((r) => r.data);

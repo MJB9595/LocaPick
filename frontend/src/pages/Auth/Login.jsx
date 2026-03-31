@@ -35,6 +35,7 @@ const Login = () => {
         name     : data.name,
         email    : data.email,
         role     : data.role,
+        profileImageUrl: data.profileImageUrl
       })
       navigate(data.role === 'ADMIN' ? '/admin' : '/app', { replace: true })
     } catch (err) {

@@ -11,3 +11,6 @@ export const login = (data) =>
 /** 로그아웃 (서버 알림 + 클라이언트 정리는 store 에서) */
 export const logout = () =>
   client.post('/auth/logout').then((r) => r.data)
+
+export const checkEmail = (email) => 
+  client.get(`/auth/check-email?email=${email}`).then((r) => r.data)

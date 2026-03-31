@@ -1,6 +1,5 @@
 package picstory.backend.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +17,13 @@ public class AuthController {
 
     private final AuthService authService;
 
-    /** POST /auth/signup - 회원가입 */
+    // 🌟 이메일 중복 체크 API
+    @GetMapping("/check-email")
+    public ResponseEntity<Map<String, Object>> checkEmail(@RequestParam String email) {
+        boolean isUsed = authService.existsByEmail(email);
+        return ResponseEntity.ok(Map.of("available", !isUsed));
+    }
+
     @PostMapping("/signup")
     public ResponseEntity<Map<String, Object>> signup(@RequestBody SignupRequest request) {
         Long memberId = authService.signup(request);
@@ -29,23 +34,14 @@ public class AuthController {
         ));
     }
 
-    /** POST /auth/login - 로그인 (JWT 반환) */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * POST /auth/logout - 로그아웃
-     * 현재는 클라이언트 토큰 삭제만으로 처리.
-     * 추후 Redis 블랙리스트 방식으로 확장 가능.
-     */
     @PostMapping("/logout")
     public ResponseEntity<Map<String, Object>> logout() {
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "로그아웃 되었습니다."
-        ));
+        return ResponseEntity.ok(Map.of("success", true, "message", "로그아웃 되었습니다."));
     }
 }

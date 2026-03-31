@@ -14,6 +14,7 @@ public record MemberResponse(
         MemberRole role,
         MemberStatus status,
         boolean emailVerified,
+        String profileImageUrl, // 🌟 추가
         LocalDateTime createdAt
 ) {
     public static MemberResponse from(Member m) {
@@ -25,6 +26,7 @@ public record MemberResponse(
                 m.getRole(),
                 m.getStatus(),
                 m.isEmailVerified(),
+                m.getProfileImageUrl(), // 🌟 추가
                 m.getCreatedAt()
         );
     }

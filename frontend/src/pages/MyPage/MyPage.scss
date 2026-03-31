@@ -1,0 +1,195 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.mypage-root {
+  min-height: 100vh;
+  padding-top: calc(#{$header-h} + 40px);
+  padding-bottom: 80px;
+
+  @include mobile {
+    padding-top: calc(#{$header-h} + 20px);
+    padding-bottom: 40px;
+  }
+}
+
+.mypage-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+  
+  @include mobile { padding: 0 16px; }
+}
+
+.loading-text {
+  text-align: center;
+  padding: 100px;
+  font-weight: bold;
+  color: $purple;
+}
+
+.page-title-area {
+  margin-bottom: 24px;
+  h1 { font-size: 24px; font-weight: 900; color: $fg; margin-bottom: 8px; }
+  p { font-size: 14px; color: $muted; }
+}
+
+/* ════════════════════════════════════════
+   1. 새로운 프로필 컨테이너 (늘어짐 방지)
+════════════════════════════════════════ */
+.profile-container {
+  display: flex;
+  padding: 40px;
+  gap: 40px;
+  margin-bottom: 30px;
+  
+  /* 부모 요소가 불필요하게 늘어나지 않도록 방어 */
+  min-height: auto;
+  height: max-content;
+  align-items: flex-start;
+
+  @include mobile {
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    gap: 20px;
+  }
+
+  /* 왼쪽: 아바타 */
+  .avatar-section {
+    flex-shrink: 0;
+
+    .avatar-circle {
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      box-shadow: $shadow-sm;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      background: $gray-100;
+      
+      img { width: 100%; height: 100%; object-fit: cover; transition: 0.2s; }
+      
+      .cam-icon {
+        position: absolute; bottom: 0; left: 0; width: 100%;
+        background: rgba(0,0,0,0.5); color: #fff;
+        text-align: center; padding: 6px 0; font-size: 14px;
+        opacity: 0; transition: 0.2s;
+      }
+
+      &:hover {
+        border-color: $purple;
+        .cam-icon { opacity: 1; }
+      }
+    }
+  }
+
+  /* 오른쪽: 텍스트 정보 */
+  .info-section {
+    flex: 1;
+    width: 100%;
+
+    .name-email {
+      h2 { font-size: 28px; font-weight: 900; color: $fg; margin-bottom: 4px; }
+      p { font-size: 15px; color: $muted; }
+    }
+
+    .solid-line {
+      border: none;
+      height: 1px;
+      background: $gray-200;
+      margin: 20px 0;
+    }
+
+    /* 🌟 핵심: 꼬이기 쉬운 Flex 대신 Grid를 사용하여 각 셀의 독립성 보장 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 20px;
+
+      @include mobile {
+        background: $gray-50;
+        padding: 20px;
+        border-radius: $r-md;
+      }
+
+      .stat-box {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start; /* 좌측 정렬 */
+        gap: 8px;
+
+        @include mobile { align-items: center; }
+
+        .s-label { font-size: 13px; font-weight: bold; color: $muted; }
+        
+        .s-value { font-size: 18px; font-weight: 900; color: $fg; }
+
+        /* 🌟 제일 문제였던 뱃지: 절대 고정 스타일 */
+        .status-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 28px; /* 🚨 절대 세로로 찢어지지 않도록 높이 명시 */
+          padding: 0 14px;
+          border-radius: 14px;
+          font-size: 12px;
+          font-weight: 800;
+          white-space: nowrap;
+          line-height: 1;
+
+          &.is-admin { background: rgba(#ef4444, 0.1); color: #dc2626; border: 1px solid rgba(#ef4444, 0.2); }
+          &.is-user { background: rgba($purple, 0.1); color: $purple; border: 1px solid rgba($purple, 0.2); }
+        }
+      }
+    }
+  }
+}
+
+/* ════════════════════════════════════════
+   2. 하단 대시보드 리스트
+════════════════════════════════════════ */
+.board-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+
+  @include mobile { grid-template-columns: 1fr; gap: 16px; }
+}
+
+.board-card {
+  padding: 0;
+  overflow: hidden;
+
+  .b-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 20px; border-bottom: 1px solid $line; background: $bg-soft;
+
+    h3 { font-size: 15px; font-weight: 800; color: $fg; margin: 0; }
+    .badge-count { font-size: 12px; font-weight: bold; background: rgba($purple, 0.1); color: $purple; padding: 2px 10px; border-radius: 12px; }
+  }
+
+  .b-body {
+    padding: 16px;
+
+    .empty-msg { text-align: center; padding: 40px 0; color: $muted; font-size: 14px; }
+
+    .b-list {
+      display: flex; flex-direction: column; gap: 8px;
+
+      li {
+        display: flex; align-items: center; gap: 12px; padding: 12px;
+        background: #fff; border: 1px solid $gray-200; border-radius: $r-sm;
+
+        .i-emoji { width: 36px; height: 36px; background: $gray-50; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+        
+        .i-text {
+          flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px;
+          strong { font-size: 14px; color: $fg; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          span { font-size: 12px; color: $muted; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        }
+      }
+    }
+  }
+}

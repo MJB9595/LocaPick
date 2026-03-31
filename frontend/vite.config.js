@@ -10,16 +10,23 @@ export default defineConfig({
   css:{
     devSourcemap:true
   },
-    server: {
+ server: {
     host: '0.0.0.0',
     port: 5173,
-    watch: {
-      usePolling: true,
-      interval: 1000,
+    watch: { usePolling: true, interval: 1000 },
+    hmr: { host: 'localhost', port: 5173 },
+    proxy: {
+      // API: /api/members → localhost:8080/members
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      // 이미지: /uploads → localhost:8080/uploads
+      '/uploads': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
-    hmr: {
-      host: 'localhost',
-      port: 5173,
-    },
-  },
+  }
 });

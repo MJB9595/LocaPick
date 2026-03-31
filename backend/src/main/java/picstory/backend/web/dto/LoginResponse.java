@@ -7,5 +7,6 @@ public record LoginResponse(
         Long memberId,
         String name,
         String email,
-        MemberRole role
+        MemberRole role,
+        String profileImageUrl // 🌟 추가
 ) {}

@@ -29,7 +29,6 @@ public class Member {
     @Column(unique = true, length = 30)
     private String phone;
 
-    /** 사용자 역할: USER(일반), ADMIN(관리자) */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private MemberRole role;
@@ -40,6 +39,10 @@ public class Member {
 
     @Column(nullable = false)
     private boolean emailVerified;
+
+    // 🌟 프로필 이미지 URL 추가
+    @Column(columnDefinition = "LONGTEXT")
+    private String profileImageUrl;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -57,33 +60,35 @@ public class Member {
         this.updatedAt = LocalDateTime.now();
     }
 
-    /** 일반 회원가입용 생성자 (role = USER 기본값) */
-    public Member(String name, String email, String passwordHash, String phone) {
+    /** 일반 회원가입용 생성자 */
+    public Member(String name, String email, String passwordHash, String phone, String profileImageUrl) {
         this.name         = name;
         this.email        = email;
         this.passwordHash = passwordHash;
         this.phone        = phone;
+        this.profileImageUrl = profileImageUrl;
         this.role         = MemberRole.USER;
         this.status       = MemberStatus.ACTIVE;
         this.emailVerified = false;
     }
 
     /** 어드민 계정 생성용 생성자 */
-    public Member(String name, String email, String passwordHash, String phone, MemberRole role) {
+    public Member(String name, String email, String passwordHash, String phone, MemberRole role, String profileImageUrl) {
         this.name         = name;
         this.email        = email;
         this.passwordHash = passwordHash;
         this.phone        = phone;
         this.role         = role;
+        this.profileImageUrl = profileImageUrl;
         this.status       = MemberStatus.ACTIVE;
         this.emailVerified = false;
     }
 
-    public void changeStatus(MemberStatus status) {
-        this.status = status;
-    }
+    public void changeStatus(MemberStatus status) { this.status = status; }
+    public void changeRole(MemberRole role) { this.role = role; }
 
-    public void changeRole(MemberRole role) {
-        this.role = role;
+    // 🌟 프로필 이미지 변경 메서드
+    public void updateProfileImage(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

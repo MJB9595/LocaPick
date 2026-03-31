@@ -25,6 +25,22 @@ const Signup = () => {
     return `${onlyNums.slice(0, 3)}-${onlyNums.slice(3, 7)}-${onlyNums.slice(7, 11)}`;
   }
 
+  const [isEmailChecked, setIsEmailChecked] = useState(false);
+
+  const handleCheckEmail = async () => {
+    if (!form.email.includes('@')) return alert("올바른 이메일을 입력하세요.");
+    try {
+      const res = await checkEmail(form.email);
+      if (res.available) {
+        alert("사용 가능한 이메일입니다.");
+        setIsEmailChecked(true);
+      } else {
+        alert("이미 존재하는 이메일입니다.");
+        setIsEmailChecked(false);
+      }
+    } catch (e) { alert("서버 오류"); }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     let finalValue = value;

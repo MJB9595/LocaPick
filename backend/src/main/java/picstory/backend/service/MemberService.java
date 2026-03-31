@@ -22,6 +22,10 @@ public class MemberService {
         return memberRepository.findAll();
     }
 
+    public void save(Member member) {
+        memberRepository.save(member);
+    }
+
     @Transactional(readOnly = true)
     public Member findById(Long id) {
         return memberRepository.findById(id)

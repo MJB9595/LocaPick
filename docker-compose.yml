@@ -31,6 +31,19 @@ services:
       start_period: 30s  # ✅ MySQL 초기화 대기 시간 확보
 
   backend:
+    environment:
+      SPRING_DATASOURCE_URL:      jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-MUI_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-m_uiuser}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-m_uipass}
+      JWT_SECRET:        ${JWT_SECRET:-change-this-secret-key-in-production-min-32chars!}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      # ✅ 추가: 업로드 경로
+      UPLOAD_DIR: /app/uploads/profiles/
+    ports:
+      - "8090:8080"
+    volumes:
+      # ✅ 추가: 업로드 파일 영구 보존 (컨테이너 재시작해도 사진 유지)
+      - uploads_data:/app/uploads
     build:
       context: ./backend
       dockerfile: Dockerfile_backend.prod
@@ -38,15 +51,6 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_URL:      jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-MUI_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-m_uiuser}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-m_uipass}
-      # ✅ JWT 환경변수 추가 (없으면 Spring Boot 즉시 크래시)
-      JWT_SECRET:        ${JWT_SECRET:-change-this-secret-key-in-production-min-32chars!}
-      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
-    ports:
-      - "8090:8080"
     restart: always
     # ✅ 메모리 제한
     deploy:
@@ -75,3 +79,4 @@ services:
 
 volumes:
   mysql_data_prod_v3:
+  uploads_data:  

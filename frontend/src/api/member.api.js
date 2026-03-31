@@ -15,3 +15,18 @@ export const updateMemberStatus = (id, status, role = null) =>
 /** 마이페이지용 내 정보 가져오기 */
 export const getMyInfo = () => 
   client.get('/members/me').then((r) => r.data);
+
+/** 프로필 이미지 업로드 */
+export const uploadProfileImage = (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  return client.post('/members/me/profile-image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    // 브라우저가 boundary를 자동 생성하도록 기존 JSON 헤더 설정 덮어쓰기
+    transformRequest: [(data, headers) => {
+      delete headers['Content-Type'];
+      return data;
+    }],
+  }).then(r => r.data);
+};

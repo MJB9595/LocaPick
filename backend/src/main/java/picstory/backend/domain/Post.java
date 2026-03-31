@@ -25,7 +25,7 @@ public class Post {
     @Column(nullable = false, length = 100)
     private String title;
 
-    @Column(nullable = false, length = 2000)
+    @Column(columnDefinition = "LONGTEXT", nullable = false)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

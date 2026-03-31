@@ -19,3 +19,15 @@ export const deletePost = (id) =>
 
 export const getMyPosts = () => 
   client.get('/posts/my').then((r) => r.data);
+
+export const uploadPostImage = (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return client.post('/images', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    transformRequest: [(data, headers) => {
+      delete headers['Content-Type'];
+      return data;
+    }],
+  }).then((r) => r.data);
+};

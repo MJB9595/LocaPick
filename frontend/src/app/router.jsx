@@ -12,6 +12,8 @@ import MapHome from '../pages/Map/MapHome'
 import MyPage from '../pages/MyPage/MyPage'
 import Favorites from '../pages/Favorites/Favorites'
 import Memo from '../pages/Memo/Memo'
+import MemoWrite from '../pages/Memo/MemoWrite'; // 🌟 새로 만들 페이지
+import MemoDetail from '../pages/Memo/MemoDetail'; // (선택) 상세 보기 페이지
 
 export const router = createBrowserRouter([
   {
@@ -36,7 +38,15 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'mypage', element: <MyPage /> },
       { path: 'favorites', element: <Favorites /> },
-      { path: 'memo', element: <Memo /> },
+      { 
+        path: 'memo', 
+        children: [
+          { index: true, element: <Memo /> }, // 목록
+          { path: 'write', element: <MemoWrite /> }, // 새 글 작성
+          { path: 'edit/:id', element: <MemoWrite /> }, // 글 수정 (파라미터로 id 받기)
+          { path: ':id', element: <MemoDetail /> } // 글 상세
+        ]
+      },
 
     ],
   },

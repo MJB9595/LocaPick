@@ -3,6 +3,8 @@ package picstory.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import picstory.backend.domain.Member;
 import picstory.backend.domain.Post;
 import picstory.backend.repository.MemberRepository;
@@ -34,6 +36,8 @@ public class PostService {
     public PostResponse create(CreatePostRequest request, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        String cleanContent = Jsoup.clean(request.content(), Safelist.relaxed().addTags("img").addAttributes("img", "src"));
 
         Post post = new Post(
                 request.category(),

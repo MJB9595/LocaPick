@@ -148,3 +148,105 @@
     }
     }
 }
+
+/* src/pages/Memo/Memo.scss 맨 아래 추가 */
+
+/* ════════════════════════════════════════
+   🌟 메모 작성 페이지 (MemoWrite) 스타일
+════════════════════════════════════════ */
+.write-page {
+  .actions {
+    display: flex; gap: 10px;
+    button {
+      padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s;
+      &.cancel-btn { background: #e5e7eb; color: #4b5563; }
+      &.cancel-btn:hover { background: #d1d5db; }
+      &.submit { background: var(--gold, #8b5cf6); color: white; }
+      &.submit:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
+    }
+  }
+
+  .write-form {
+    background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e5e5e5;
+    display: flex; flex-direction: column; gap: 16px;
+    
+    .w-select, .w-input {
+      padding: 14px; border-radius: 8px; border: 1px solid #e5e5e5; font-size: 1rem; outline: none;
+      &:focus { border-color: #8b5cf6; }
+    }
+    
+    .w-input { font-weight: bold; font-size: 1.1rem; }
+
+    /* React Quill 에디터 디자인 튜닝 */
+    .editor-container {
+      margin-top: 10px;
+      .quill { 
+        background: #fff; 
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .ql-toolbar {
+        border: 1px solid #e5e5e5;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        background: #f9fafb;
+      }
+      .ql-container {
+        border: 1px solid #e5e5e5;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        min-height: 400px; /* 에디터 기본 높이 */
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+/* ════════════════════════════════════════
+   🌟 메모 상세 페이지 (MemoDetail) 스타일
+════════════════════════════════════════ */
+.detail-page {
+  max-width: 800px; margin: 0 auto;
+
+  .detail-header {
+    border-bottom: 1px solid #e5e5e5; padding-bottom: 24px; margin-bottom: 24px;
+    
+    .category-badge {
+      display: inline-block; padding: 4px 10px; border-radius: 6px; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; font-size: 0.85rem; font-weight: bold; margin-bottom: 12px;
+    }
+    .detail-title { font-size: 2rem; font-weight: 900; color: #111; margin-bottom: 16px; }
+    .detail-meta { display: flex; gap: 16px; color: #6b7280; font-size: 0.9rem; }
+  }
+
+  /* 🌟 본문 사진 반응형 처리 */
+  .detail-content {
+    min-height: 300px; line-height: 1.8; color: #374151; font-size: 1.05rem;
+    
+    /* 에디터에서 올라간 이미지들이 박스를 뚫고 나가지 않도록 방어 */
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 16px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    p { margin-bottom: 1em; }
+  }
+
+  .detail-actions {
+    margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e5e5;
+    display: flex; justify-content: space-between; align-items: center;
+
+    button {
+      padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s;
+      &.btn-back { background: #f3f4f6; color: #374151; }
+      &.btn-back:hover { background: #e5e7eb; }
+      &.btn-edit { background: #8b5cf6; color: white; }
+      &.btn-edit:hover { background: #7c3aed; }
+      &.btn-delete { background: #fee2e2; color: #dc2626; margin-left: 8px; }
+      &.btn-delete:hover { background: #fecaca; }
+    }
+    .right-btns { display: flex; }
+  }
+}

@@ -99,8 +99,10 @@ const MapHome = () => {
   const [locaCategory, setLocaCategory] = useState('restaurant'); 
   const [locaResults, setLocaResults] = useState([]);
   const [isLocaLoading, setIsLocaLoading] = useState(false);
+  const [carRoutes, setCarRoutes] = useState([]); 
+  const [selectedCarIdx, setSelectedCarIdx] = useState(0);
 
-  // 🌟 스크롤 및 포커싱을 위한 Ref와 State 추가
+  // 스크롤 및 포커싱을 위한 Ref와 State 추가
   const mapContainerRef = useRef(null);
   const locaResultsRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
@@ -133,7 +135,7 @@ const MapHome = () => {
 
   // 🌟 현재 활성화된 경로 선들을 계산하여 저장 (포커싱에 사용)
   const activeLines = useMemo(() => {
-    if (activeTab === 'CAR' && carRoute) return carRoute.lines;
+    if (activeTab === 'CAR' && carRoutes.length > 0) return carRoutes[selectedCarIdx].lines;
     if (activeTab === 'TRANSIT') return transitLines;
     if (activeTab === 'WALK' && walkRoute) return walkRoute.lines;
     return [];
@@ -272,20 +274,54 @@ const MapHome = () => {
       setWalkRoute({ lines: [{ type: 'WALK', path: [startPoint, endPoint] }], info: { distance: walkDist, duration: walkTime } });
     }
 
-    let fetchedCarRoute = null;
+
+    let fetchedCarRoutes = [];
     try {
       const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_KEY;
-      const url = `https://apis-navi.kakaomobility.com/v1/directions?origin=${startPoint.lng},${startPoint.lat}&destination=${endPoint.lng},${endPoint.lat}&priority=RECOMMEND`;
-      const res = await fetch(url, { headers: { Authorization: `KakaoAK ${REST_API_KEY}`, 'Content-Type': 'application/json' }});
-      const data = await res.json();
-      if (data.routes && data.routes.length > 0) {
-        const route = data.routes[0];
-        const linePath = [];
-        route.sections[0].roads.forEach(road => { for (let i = 0; i < road.vertexes.length; i += 2) { linePath.push({ lng: road.vertexes[i], lat: road.vertexes[i + 1] }); } });
-        fetchedCarRoute = { lines: [{ type: 'CAR', path: linePath }], info: { distance: route.summary.distance, duration: route.summary.duration } };
-      }
+      
+      // 🌟 이모지는 렌더링 쪽으로 빼고 타입과 라벨만 정의
+      const priorities = [
+        { type: 'RECOMMEND', label: '추천 경로' },
+        { type: 'TIME', label: '최단 시간' },
+        { type: 'FREE', label: '무료 도로' }
+      ];
+
+      const requests = priorities.map(async (p) => {
+        const url = `https://apis-navi.kakaomobility.com/v1/directions?origin=${startPoint.lng},${startPoint.lat}&destination=${endPoint.lng},${endPoint.lat}&priority=${p.type}`;
+        const res = await fetch(url, { headers: { Authorization: `KakaoAK ${REST_API_KEY}`, 'Content-Type': 'application/json' }});
+        const data = await res.json();
+        
+        if (data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          const linePath = [];
+          route.sections[0].roads.forEach(road => { 
+            for (let i = 0; i < road.vertexes.length; i += 2) { 
+              linePath.push({ lng: road.vertexes[i], lat: road.vertexes[i + 1] }); 
+            } 
+          });
+          return {
+            type: p.type, // 🌟 스타일 구분을 위해 타입 추가
+            label: p.label,
+            lines: [{ type: 'CAR', path: linePath }],
+            info: { 
+              distance: route.summary.distance, 
+              duration: route.summary.duration,
+              tollFare: route.summary.fare.toll // 🌟 통행료 데이터 추가!
+            }
+          };
+        }
+        return null;
+      });
+
+      const results = await Promise.all(requests);
+      
+      // 🌟 중복 제거 로직 완전 삭제! 3개 카드가 무조건 다 나오도록 변경
+      fetchedCarRoutes = results.filter(Boolean);
+
     } catch (e) { console.error("자동차 경로 에러", e); }
-    setCarRoute(fetchedCarRoute);
+    
+    setCarRoutes(fetchedCarRoutes);
+    setSelectedCarIdx(0);
 
     let fetchedTransitPaths = [];
     try {
@@ -444,10 +480,36 @@ const MapHome = () => {
                   <button className={`tab-btn ${activeTab === 'WALK' ? 'active' : ''}`} onClick={() => setActiveTab('WALK')}>🚶 도보</button>
                 </div>
                 <div className="tab-content">
+
                   {activeTab === 'CAR' && (
-                    carRoute ? (
-                      <div className="route-summary"><div className="summary-item time">예상 {formatTime(carRoute.info.duration)}</div><div className="summary-item dist">총 거리 {formatDistance(carRoute.info.distance)}</div></div>
-                    ) : <div className="no-route">자동차 경로가 없습니다.</div>
+                    carRoutes.length > 0 ? (
+                      <div className="car-routes-container">
+                        <div className="car-route-list">
+                          {carRoutes.map((route, idx) => {
+                            const isSelected = selectedCarIdx === idx;
+                            // 경로 타입(RECOMMEND, TIME, FREE)을 소문자로 변환하여 클래스명으로 사용
+                            const typeClass = route.type.toLowerCase(); 
+                            
+                            return (
+                              <div 
+                                key={idx} 
+                                className={`car-route-card ${typeClass} ${isSelected ? 'selected' : ''}`} 
+                                onClick={() => setSelectedCarIdx(idx)}
+                              >
+                                <span className="route-badge">{route.label}</span>
+                                
+                                <div className="route-meta">
+                                  <span className="time">{formatTime(route.info.duration)}</span>
+                                  <span className="dist-toll">
+                                    {formatDistance(route.info.distance)} · {route.info.tollFare > 0 ? `통행료 ${route.info.tollFare.toLocaleString()}원` : '무료'}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : <div className="no-route">자동차 경로를 찾을 수 없습니다.</div>
                   )}
 
                   {activeTab === 'WALK' && (
@@ -505,7 +567,10 @@ const MapHome = () => {
                           })}
                         </div>
                       </div>
-                    ) : <div className="no-route">대중교통 경로가 없습니다.</div>
+                    ) : <div className="no-route">
+                        <p>대중교통 경로가 없어요! 🚶‍♂️</p>
+                        <p>가까운 거리는 <button className="walk-link-btn" onClick={() => setActiveTab('WALK')}>도보</button>로 이동하는 건 어떠세요?</p>
+                      </div>
                   )}
                 </div>
               </div>

@@ -42,7 +42,7 @@ public class SecurityConfig {
                         // 공개 엔드포인트
                         .requestMatchers(HttpMethod.POST, "/auth/signup", "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/**", "/actuator/health", "/locapick/**", "/uploads/**", "/api/uploads/**").permitAll()
+                        .requestMatchers("/auth/**", "/actuator/health", "/locapick/**", "/uploads/**", "/api/uploads/**", "/images/**", "/api/images/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
 
                         // 어드민 전용 엔드포인트

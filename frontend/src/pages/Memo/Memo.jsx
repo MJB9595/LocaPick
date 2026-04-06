@@ -2,11 +2,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyPosts, deletePost } from '../../api/post.api';
+import { useLocation } from 'react-router-dom'; // 🌟 추가
 import './Memo.scss';
 
 const Memo = () => {
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
+
+  const location = useLocation();
+
+  // 핵심: 마이페이지에서 'selectedPost' 데이터를 들고 넘어왔을 때 자동 실행
+  useEffect(() => {
+    if (location.state && location.state.selectedPost) {
+      // Memo.jsx에 이미 만들어두신 상세창 여는 함수 호출!
+      openPostDetail(location.state.selectedPost);
+      
+      // 무한 루프 방지
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   useEffect(() => {
     fetchData();

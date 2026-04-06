@@ -14,6 +14,8 @@ import Favorites from '../pages/Favorites/Favorites'
 import Memo from '../pages/Memo/Memo'
 import MemoWrite from '../pages/Memo/MemoWrite'; // 🌟 새로 만들 페이지
 import MemoDetail from '../pages/Memo/MemoDetail'; // (선택) 상세 보기 페이지
+import ChatList from '../pages/Chat/ChatList'; 
+import ChatRoom from '../pages/Chat/ChatRoom'; 
 
 export const router = createBrowserRouter([
   {
@@ -47,6 +49,13 @@ export const router = createBrowserRouter([
           { path: ':id', element: <MemoDetail /> } // 글 상세
         ]
       },
+      {
+        path: 'chat',
+        children: [
+          { index: true, element: <ChatList /> }, // 채팅방 목록 (/app/chat)
+          { path: ':roomId', element: <ChatRoom /> } // 개별 채팅방 (/app/chat/123)
+        ]
+      }
 
     ],
   },

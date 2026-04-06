@@ -34,7 +34,7 @@
 }
 
 /* ════════════════════════════════════════
-   1. 새로운 프로필 컨테이너 (늘어짐 방지)
+   1. 프로필 컨테이너
 ════════════════════════════════════════ */
 .profile-container {
   display: flex;
@@ -42,7 +42,6 @@
   gap: 40px;
   margin-bottom: 30px;
   
-  /* 부모 요소가 불필요하게 늘어나지 않도록 방어 */
   min-height: auto;
   height: max-content;
   align-items: flex-start;
@@ -54,7 +53,6 @@
     gap: 20px;
   }
 
-  /* 왼쪽: 아바타 */
   .avatar-section {
     flex-shrink: 0;
 
@@ -84,7 +82,6 @@
     }
   }
 
-  /* 오른쪽: 텍스트 정보 */
   .info-section {
     flex: 1;
     width: 100%;
@@ -101,7 +98,6 @@
       margin: 20px 0;
     }
 
-    /* 🌟 핵심: 꼬이기 쉬운 Flex 대신 Grid를 사용하여 각 셀의 독립성 보장 */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -116,21 +112,19 @@
       .stat-box {
         display: flex;
         flex-direction: column;
-        align-items: flex-start; /* 좌측 정렬 */
+        align-items: flex-start;
         gap: 8px;
 
         @include mobile { align-items: center; }
 
         .s-label { font-size: 13px; font-weight: bold; color: $muted; }
-        
         .s-value { font-size: 18px; font-weight: 900; color: $fg; }
 
-        /* 🌟 제일 문제였던 뱃지: 절대 고정 스타일 */
         .status-badge {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          height: 28px; /* 🚨 절대 세로로 찢어지지 않도록 높이 명시 */
+          height: 28px; 
           padding: 0 14px;
           border-radius: 14px;
           font-size: 12px;
@@ -146,8 +140,6 @@
   }
 }
 
-
-
 /* ════════════════════════════════════════
    2. 하단 대시보드 리스트
 ════════════════════════════════════════ */
@@ -157,19 +149,68 @@
   gap: 24px;
   align-items: start;
 
-  @include mobile { grid-template-columns: 1fr; gap: 16px; }
+  .board-card:first-child {
+    grid-column: 1 / -1;
+  }
+
+  @include mobile { 
+    grid-template-columns: 1fr; 
+    gap: 16px; 
+    .board-card:first-child { grid-column: auto; }
+  }
 }
 
 .board-card {
   padding: 0;
   overflow: hidden;
+  transition: transform $ease, box-shadow $ease, border-color $ease;
 
+  /* 🌟 채팅 카드 전체 클릭 효과 */
+  &.clickable-card {
+    cursor: pointer;
+    border: 1px solid transparent;
+    .b-header { background: rgba($purple, 0.05); }
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: $shadow-lg;
+      border-color: rgba($purple, 0.4);
+      .more-icon { transform: translateX(4px); color: $purple; }
+    }
+  }
+
+  /* 헤더 기본 스타일 */
   .b-header {
     display: flex; justify-content: space-between; align-items: center;
     padding: 16px 20px; border-bottom: 1px solid $line; background: $bg-soft;
+    transition: background $ease;
 
     h3 { font-size: 15px; font-weight: 800; color: $fg; margin: 0; }
-    .badge-count { font-size: 12px; font-weight: bold; background: rgba($purple, 0.1); color: $purple; padding: 2px 10px; border-radius: 12px; }
+    
+    .h-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .badge-count { 
+      font-size: 12px; font-weight: bold; background: rgba($purple, 0.1); color: $purple; 
+      padding: 4px 12px; border-radius: 12px; 
+    }
+    
+    .more-icon {
+      font-size: 12px;
+      color: $muted;
+      transition: transform 0.2s, color 0.2s;
+    }
+    
+    /* 🌟 헤더 클릭 효과 (즐겨찾기, 메모 전체보기) */
+    &.clickable-header {
+      cursor: pointer;
+      &:hover {
+        background: rgba($purple, 0.05);
+        .more-icon { transform: translateX(4px); color: $purple; }
+      }
+    }
   }
 
   .b-body {
@@ -177,12 +218,33 @@
 
     .empty-msg { text-align: center; padding: 40px 0; color: $muted; font-size: 14px; }
 
+    .chat-shortcut {
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      gap: 8px; padding: 24px; background: linear-gradient(135deg, rgba($purple, 0.03), rgba($purple, 0.08));
+      border-radius: $r-sm; text-align: center; border: 1px dashed rgba($purple, 0.2);
+
+      p { font-size: 1.1rem; font-weight: 900; color: $purple-2; margin: 0; }
+      span { font-size: 0.9rem; color: $muted; }
+    }
+
     .b-list {
       display: flex; flex-direction: column; gap: 8px;
 
       li {
         display: flex; align-items: center; gap: 12px; padding: 12px;
         background: #fff; border: 1px solid $gray-200; border-radius: $r-sm;
+        transition: $ease-fast;
+
+        /* 🌟 리스트 아이템 클릭 효과 */
+        &.clickable-item {
+          cursor: pointer;
+          &:hover {
+            background: $gray-50;
+            border-color: $purple-2;
+            transform: translateX(4px);
+            box-shadow: $shadow-sm;
+          }
+        }
 
         .i-emoji { width: 36px; height: 36px; background: $gray-50; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
         

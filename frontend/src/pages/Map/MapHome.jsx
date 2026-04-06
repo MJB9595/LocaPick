@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useLocation } from 'react-router-dom'; // 🌟 경로 데이터 수신 훅 추가
 import { Map, MapMarker, Polyline, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import { getLocapickResults } from '../../api/locapick.api';
 import { getMyFavorites, toggleFavorite } from '../../api/favorite.api';
@@ -6,7 +7,6 @@ import './MapHome.scss';
 
 const { kakao } = window;
 
-// 🌟 대비가 확실하고 깔끔한 SVG 별 아이콘 컴포넌트
 const StarIcon = ({ isFilled }) => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
@@ -16,12 +16,7 @@ const StarIcon = ({ isFilled }) => (
     stroke={isFilled ? "#F59E0B" : "#94A3B8"} 
     strokeWidth="2" 
     strokeLinecap="round" strokeLinejoin="round"
-    style={{ 
-      transition: 'all 0.2s', 
-      filter: isFilled ? 'drop-shadow(0 2px 4px rgba(245, 158, 11, 0.4))' : 'none',
-      verticalAlign: 'middle',
-      marginBottom: '2px'
-    }}
+    style={{ transition: 'all 0.2s', filter: isFilled ? 'drop-shadow(0 2px 4px rgba(245, 158, 11, 0.4))' : 'none', verticalAlign: 'middle', marginBottom: '2px' }}
   >
     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
   </svg>
@@ -73,6 +68,9 @@ const getTmapWalkData = async (startPos, endPos, startName = "출발", endName =
 };
 
 const MapHome = () => {
+  // 🌟 1. 모든 훅(Hook)과 State 변수들이 먼저 선언되어야 합니다! (순서 매우 중요)
+  const location = useLocation();
+
   const [center, setCenter] = useState({ lat: 37.5665, lng: 126.9780 });
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
@@ -84,14 +82,15 @@ const MapHome = () => {
   const [isSearching, setIsSearching] = useState(false); 
 
   const [activeTab, setActiveTab] = useState(null); 
-  const [carRoute, setCarRoute] = useState(null); 
   const [walkRoute, setWalkRoute] = useState(null); 
   const [transitRoutes, setTransitRoutes] = useState([]); 
   const [selectedTransitIdx, setSelectedTransitIdx] = useState(0);
   const [transitLines, setTransitLines] = useState([]);
   const [transitDetails, setTransitDetails] = useState([]);
-  const [transitInfo, setTransitInfo] = useState(null);
   const [myFavorites, setMyFavorites] = useState([]);
+
+  const [carRoutes, setCarRoutes] = useState([]); 
+  const [selectedCarIdx, setSelectedCarIdx] = useState(0);
 
   const [isLocapickOpen, setIsLocapickOpen] = useState(false);
   const [locaTime, setLocaTime] = useState(15); 
@@ -99,13 +98,45 @@ const MapHome = () => {
   const [locaCategory, setLocaCategory] = useState('restaurant'); 
   const [locaResults, setLocaResults] = useState([]);
   const [isLocaLoading, setIsLocaLoading] = useState(false);
-  const [carRoutes, setCarRoutes] = useState([]); 
-  const [selectedCarIdx, setSelectedCarIdx] = useState(0);
 
-  // 스크롤 및 포커싱을 위한 Ref와 State 추가
   const mapContainerRef = useRef(null);
   const locaResultsRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
+
+  // 🌟 2. 변수들이 다 만들어졌으니 이제 안전하게 useEffect 실행 가능!
+  
+  // 즐겨찾기에서 넘어온 목적지 자동 세팅 
+  useEffect(() => {
+    if (location.state && location.state.destination) {
+      const dest = location.state.destination;
+      
+      const pointData = { 
+        name: dest.placeName, 
+        address: dest.address,
+        lat: parseFloat(dest.lat), 
+        lng: parseFloat(dest.lng)
+      };
+      
+      setEndPoint(pointData);
+      setCenter(pointData);
+      
+      // 내 위치가 아직 안 잡혔다면 한 번 더 잡아줌
+      if (!startPoint && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setStartPoint({ name: '내 위치', lat: pos.coords.latitude, lng: pos.coords.longitude });
+          }
+        );
+      }
+
+      setActiveTab(null);
+      setWalkRoute(null); setTransitRoutes([]); setTransitLines([]);
+      setCarRoutes([]); setSelectedCarIdx(0);
+      setKeyword(''); setPlaces([]); setSelectedPlace(null);
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, startPoint]); // 의존성에 startPoint 추가해도 에러 안 남 (위에 선언했으므로)
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -113,12 +144,14 @@ const MapHome = () => {
         (position) => {
           const currentPos = { lat: position.coords.latitude, lng: position.coords.longitude };
           setCenter(currentPos);
-          setStartPoint({ name: '내 위치', lat: currentPos.lat, lng: currentPos.lng });
+          // location.state로 넘어온 목적지가 처리될 시간을 살짝 벌어줌
+          if (!startPoint) setStartPoint({ name: '내 위치', lat: currentPos.lat, lng: currentPos.lng });
           setIsLoading(false);
         },
         () => setIsLoading(false)
       );
     } else { setIsLoading(false); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -133,32 +166,26 @@ const MapHome = () => {
     fetchFavorites();
   }, []);
 
-  // 🌟 현재 활성화된 경로 선들을 계산하여 저장 (포커싱에 사용)
   const activeLines = useMemo(() => {
     if (activeTab === 'CAR' && carRoutes.length > 0) return carRoutes[selectedCarIdx].lines;
     if (activeTab === 'TRANSIT') return transitLines;
     if (activeTab === 'WALK' && walkRoute) return walkRoute.lines;
     return [];
-  }, [activeTab, carRoute, transitLines, walkRoute]);
+  }, [activeTab, carRoutes, selectedCarIdx, transitLines, walkRoute]);
 
-  // 🌟 기능 1: 통합 길찾기 완료 시 지도 자동 줌(Bounds) 및 스크롤 이동
   useEffect(() => {
     if (mapInstance && activeLines && activeLines.length > 0) {
       const bounds = new kakao.maps.LatLngBounds();
       
-      // 경로의 모든 좌표를 bounds에 추가
       activeLines.forEach(line => {
         line.path.forEach(p => bounds.extend(new kakao.maps.LatLng(p.lat, p.lng)));
       });
 
-      // 출발지, 도착지도 확실하게 포함
       if (startPoint) bounds.extend(new kakao.maps.LatLng(startPoint.lat, startPoint.lng));
       if (endPoint) bounds.extend(new kakao.maps.LatLng(endPoint.lat, endPoint.lng));
 
-      // 지도의 시야를 꽉 차게 변경
       mapInstance.setBounds(bounds);
 
-      // 모바일 환경일 경우 지도 컨테이너로 스크롤 부드럽게 이동
       if (window.innerWidth <= 768 && mapContainerRef.current) {
         setTimeout(() => {
           mapContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -167,7 +194,6 @@ const MapHome = () => {
     }
   }, [mapInstance, activeLines, startPoint, endPoint]);
 
-  // 🌟 기능 2: LocaPick 결과 로딩 완료 시 결과 영역으로 스크롤 이동
   useEffect(() => {
     if (locaResults.length > 0 && locaResultsRef.current) {
       setTimeout(() => {
@@ -187,7 +213,7 @@ const MapHome = () => {
         setMyFavorites(myFavorites.filter(fav => fav.placeName !== name));
       }
     } catch (error) {
-      alert("즐겨찾기 처리 중 오류가 발생했습니다. 로그인이 되어있는지 확인해주세요.");
+      alert("즐겨찾기 처리 중 오류가 발생했습니다.");
     }
   };
 
@@ -233,7 +259,8 @@ const MapHome = () => {
     setIsLocapickOpen(false); 
     
     setActiveTab(null);
-    setCarRoute(null); setWalkRoute(null); setTransitRoutes([]); setTransitLines([]);
+    setWalkRoute(null); setTransitRoutes([]); setTransitLines([]);
+    setCarRoutes([]); setSelectedCarIdx(0);
   };
 
   const searchPlaces = (e) => {
@@ -256,87 +283,86 @@ const MapHome = () => {
     e.stopPropagation();
     const pointData = { name: place.place_name, lat: parseFloat(place.y), lng: parseFloat(place.x) };
     if (type === 'START') setStartPoint(pointData); else setEndPoint(pointData);
-    setPlaces([]); setKeyword(''); setSelectedPlace(null); setActiveTab(null); setCarRoute(null); setWalkRoute(null); setTransitRoutes([]); setTransitLines([]);
+    setPlaces([]); setKeyword(''); setSelectedPlace(null); 
+    setActiveTab(null); setWalkRoute(null); setTransitRoutes([]); setTransitLines([]);
+    setCarRoutes([]); setSelectedCarIdx(0);
   };
 
   const handleSearchAllRoutes = async () => {
     if (!startPoint || !endPoint) return;
     setIsSearching(true);
 
-    const straightDist = getDistance(startPoint.lat, startPoint.lng, endPoint.lat, endPoint.lng);
-    const walkDist = Math.round(straightDist * 1.3); 
-    const walkTime = Math.round(walkDist / 80) * 60; 
-    
-    const tmapWalk = await getTmapWalkData(startPoint, endPoint);
-    if (tmapWalk.path.length > 2) {
-      setWalkRoute({ lines: [{ type: 'WALK', path: tmapWalk.path }], info: { distance: tmapWalk.distance, duration: tmapWalk.time } });
-    } else {
-      setWalkRoute({ lines: [{ type: 'WALK', path: [startPoint, endPoint] }], info: { distance: walkDist, duration: walkTime } });
-    }
-
-
-    let fetchedCarRoutes = [];
     try {
-      const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_KEY;
+      const straightDist = getDistance(startPoint.lat, startPoint.lng, endPoint.lat, endPoint.lng);
+      const walkDist = Math.round(straightDist * 1.3); 
+      const walkTime = Math.round(walkDist / 80) * 60; 
       
-      // 🌟 이모지는 렌더링 쪽으로 빼고 타입과 라벨만 정의
-      const priorities = [
-        { type: 'RECOMMEND', label: '추천 경로' },
-        { type: 'TIME', label: '최단 시간' },
-        { type: 'FREE', label: '무료 도로' }
-      ];
-
-      const requests = priorities.map(async (p) => {
-        const url = `https://apis-navi.kakaomobility.com/v1/directions?origin=${startPoint.lng},${startPoint.lat}&destination=${endPoint.lng},${endPoint.lat}&priority=${p.type}`;
-        const res = await fetch(url, { headers: { Authorization: `KakaoAK ${REST_API_KEY}`, 'Content-Type': 'application/json' }});
-        const data = await res.json();
-        
-        if (data.routes && data.routes.length > 0) {
-          const route = data.routes[0];
-          const linePath = [];
-          route.sections[0].roads.forEach(road => { 
-            for (let i = 0; i < road.vertexes.length; i += 2) { 
-              linePath.push({ lng: road.vertexes[i], lat: road.vertexes[i + 1] }); 
-            } 
-          });
-          return {
-            type: p.type, // 🌟 스타일 구분을 위해 타입 추가
-            label: p.label,
-            lines: [{ type: 'CAR', path: linePath }],
-            info: { 
-              distance: route.summary.distance, 
-              duration: route.summary.duration,
-              tollFare: route.summary.fare.toll // 🌟 통행료 데이터 추가!
-            }
-          };
+      let newWalkRoute = { lines: [{ type: 'WALK', path: [startPoint, endPoint] }], info: { distance: walkDist, duration: walkTime } };
+      try {
+        const tmapWalk = await getTmapWalkData(startPoint, endPoint);
+        if (tmapWalk.path && tmapWalk.path.length > 2) {
+          newWalkRoute = { lines: [{ type: 'WALK', path: tmapWalk.path }], info: { distance: tmapWalk.distance, duration: tmapWalk.time } };
         }
-        return null;
-      });
+      } catch (e) { console.error("도보 계산 실패", e); }
+      setWalkRoute(newWalkRoute);
 
-      const results = await Promise.all(requests);
-      
-      // 🌟 중복 제거 로직 완전 삭제! 3개 카드가 무조건 다 나오도록 변경
-      fetchedCarRoutes = results.filter(Boolean);
+      let newCarRoutes = []; 
+      try {
+        const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_KEY;
+        const url = `https://apis-navi.kakaomobility.com/v1/directions?origin=${startPoint.lng},${startPoint.lat}&destination=${endPoint.lng},${endPoint.lat}&priority=RECOMMEND`;
+        
+        const res = await fetch(url, { headers: { Authorization: `KakaoAK ${REST_API_KEY}`, 'Content-Type': 'application/json' }});
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (data.routes && data.routes.length > 0) {
+            const route = data.routes[0];
+            const linePath = [];
+            route.sections[0].roads.forEach(road => { 
+              for (let i = 0; i < road.vertexes.length; i += 2) { 
+                linePath.push({ lng: road.vertexes[i], lat: road.vertexes[i + 1] }); 
+              } 
+            });
+            
+            newCarRoutes.push({ 
+              type: 'RECOMMEND', label: '추천 경로', lines: [{ type: 'CAR', path: linePath }], 
+              info: { distance: route.summary.distance, duration: route.summary.duration, tollFare: route.summary.fare.toll } 
+            });
+          }
+        }
+      } catch (e) { console.error("자동차 API 에러", e); }
+      setCarRoutes(newCarRoutes);
+      setSelectedCarIdx(0);
 
-    } catch (e) { console.error("자동차 경로 에러", e); }
-    
-    setCarRoutes(fetchedCarRoutes);
-    setSelectedCarIdx(0);
+      let newTransitRoutes = [];
+      try {
+        const ODSAY_KEY = import.meta.env.VITE_ODSAY_KEY;
+        const url = `https://api.odsay.com/v1/api/searchPubTransPathT?SX=${startPoint.lng}&SY=${startPoint.lat}&EX=${endPoint.lng}&EY=${endPoint.lat}&apiKey=${encodeURIComponent(ODSAY_KEY)}`;
+        const res = await fetch(url);
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (!data.error && data.result && data.result.path.length > 0) {
+            newTransitRoutes = data.result.path;
+          }
+        }
+      } catch (e) { console.error("대중교통 API 에러", e); }
+      setTransitRoutes(newTransitRoutes);
 
-    let fetchedTransitPaths = [];
-    try {
-      const ODSAY_KEY = import.meta.env.VITE_ODSAY_KEY;
-      const url = `https://api.odsay.com/v1/api/searchPubTransPathT?SX=${startPoint.lng}&SY=${startPoint.lat}&EX=${endPoint.lng}&EY=${endPoint.lat}&apiKey=${encodeURIComponent(ODSAY_KEY)}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      if (!data.error && data.result && data.result.path.length > 0) fetchedTransitPaths = data.result.path;
-    } catch (e) { console.error("대중교통 경로 에러", e); }
-    setTransitRoutes(fetchedTransitPaths);
+      if (newTransitRoutes.length > 0) { 
+        setActiveTab('TRANSIT'); 
+        await handleSelectTransitRoute(newTransitRoutes[0], 0); 
+      } else if (newCarRoutes.length > 0) { 
+        setActiveTab('CAR'); 
+      } else { 
+        setActiveTab('WALK'); 
+      }
 
-    if (fetchedTransitPaths.length > 0) { setActiveTab('TRANSIT'); await handleSelectTransitRoute(fetchedTransitPaths[0], 0); } 
-    else if (fetchedCarRoute) { setActiveTab('CAR'); } 
-    else { setActiveTab('WALK'); }
-    setIsSearching(false);
+    } catch (fatalError) {
+      console.error("경로 탐색 중 알 수 없는 에러 발생:", fatalError);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleSelectTransitRoute = async (route, idx) => {
@@ -389,7 +415,7 @@ const MapHome = () => {
           newRouteLines.push({ type: type, path: path }); currentPos = endPos;
         }
       }
-      setTransitLines(newRouteLines); setTransitInfo({ distance: route.info.totalDistance, duration: route.info.totalTime * 60 });
+      setTransitLines(newRouteLines); 
     } catch (err) { console.error("폴리라인 로드 에러:", err); }
   };
 
@@ -487,7 +513,6 @@ const MapHome = () => {
                         <div className="car-route-list">
                           {carRoutes.map((route, idx) => {
                             const isSelected = selectedCarIdx === idx;
-                            // 경로 타입(RECOMMEND, TIME, FREE)을 소문자로 변환하여 클래스명으로 사용
                             const typeClass = route.type.toLowerCase(); 
                             
                             return (
@@ -569,7 +594,7 @@ const MapHome = () => {
                       </div>
                     ) : <div className="no-route">
                         <p>대중교통 경로가 없어요! 🚶‍♂️</p>
-                        <p>가까운 거리는 <button className="walk-link-btn" onClick={() => setActiveTab('WALK')}>도보</button>로 이동하는 건 어떠세요?</p>
+                        <p>가까운 거리는 <button className="walk-link-btn" onClick={() => setActiveTab('WALK')} style={{ background:'none', border:'none', color:'#8b5cf6', fontWeight:'bold', cursor:'pointer' }}>도보</button>로 이동하는 건 어떠세요?</p>
                       </div>
                   )}
                 </div>
@@ -578,7 +603,6 @@ const MapHome = () => {
           </div>
         </div>
 
-        {/* 🌟 지도 컨테이너 (ref 할당) */}
         <div className="map-container card" ref={mapContainerRef}>
           {isLoading ? (
             <div className="map-loading">지도를 불러오는 중입니다...</div>
@@ -587,7 +611,7 @@ const MapHome = () => {
               center={center} 
               style={{ width: "100%", height: "100%", display: "block", borderRadius: "20px" }} 
               level={5}
-              onCreate={setMapInstance} // 🌟 지도 생성 시 인스턴스 캡처
+              onCreate={setMapInstance} 
             >
               {(() => {
                 const isLocaDest = endPoint && locaResults.some(place => place.name === endPoint.name);
@@ -713,7 +737,6 @@ const MapHome = () => {
                     {isLocaLoading ? '최적의 장소 찾는 중...' : '알고리즘 실행'}
                   </button>
 
-                  {/* 🌟 LocaPick 결과 리스트 영역 (ref 할당) */}
                   {locaResults.length > 0 && (
                     <div className="loca-results" ref={locaResultsRef}>
                       <h4>💡 추천 결과 ({locaResults.length}개)</h4>

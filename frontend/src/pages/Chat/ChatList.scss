@@ -1,0 +1,77 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.chatlist-root {
+  min-height: 100vh;
+  padding-top: calc(80px + 20px); // 헤더 높이 고려
+  display: flex;
+  justify-content: center;
+}
+
+.chatlist-container {
+  width: 100%;
+  max-width: 600px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.list-header {
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+  h2 { margin: 0; font-size: 1.2rem; color: #333; }
+}
+
+.room-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.room-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover { background: #f9f9f9; }
+
+  .profile-avatar {
+    width: 50px;
+    height: 50px;
+    background: #8b5cf6;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 15px;
+  }
+
+  .room-info {
+    flex: 1;
+    .info-top {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      .name { font-weight: 600; color: #333; }
+      .time { font-size: 0.8rem; color: #999; }
+    }
+    .info-bottom {
+      display: flex;
+      justify-content: space-between;
+      .last-msg { font-size: 0.9rem; color: #666; }
+      .unread-badge {
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 10px;
+      }
+    }
+  }
+}

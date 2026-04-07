@@ -12,8 +12,9 @@ import MapHome from '../pages/Map/MapHome'
 import MyPage from '../pages/MyPage/MyPage'
 import Favorites from '../pages/Favorites/Favorites'
 import Memo from '../pages/Memo/Memo'
-import MemoWrite from '../pages/Memo/MemoWrite'; // 🌟 새로 만들 페이지
-import MemoDetail from '../pages/Memo/MemoDetail'; // (선택) 상세 보기 페이지
+import MemoWrite from '../pages/Memo/MemoWrite'; 
+import MemoDetail from '../pages/Memo/MemoDetail'; 
+import MemoEdit from '../pages/Memo/MemoEdit'; 
 import ChatList from '../pages/Chat/ChatList'; 
 import ChatRoom from '../pages/Chat/ChatRoom'; 
 
@@ -43,20 +44,19 @@ export const router = createBrowserRouter([
       { 
         path: 'memo', 
         children: [
-          { index: true, element: <Memo /> }, // 목록
-          { path: 'write', element: <MemoWrite /> }, // 새 글 작성
-          { path: 'edit/:id', element: <MemoWrite /> }, // 글 수정 (파라미터로 id 받기)
-          { path: ':id', element: <MemoDetail /> } // 글 상세
+          { index: true, element: <Memo /> },               // 목록 (/app/memo)
+          { path: 'write', element: <MemoWrite /> },        // 새 글 작성 (/app/memo/write)
+          { path: ':id', element: <MemoDetail /> },         // 글 상세 (/app/memo/123)
+          { path: 'edit/:id', element: <MemoEdit /> }       // 글 수정 (/app/memo/edit/123)
         ]
       },
       {
         path: 'chat',
         children: [
-          { index: true, element: <ChatList /> }, // 채팅방 목록 (/app/chat)
+          { index: true, element: <ChatList /> },    // 채팅방 목록 (/app/chat)
           { path: ':roomId', element: <ChatRoom /> } // 개별 채팅방 (/app/chat/123)
         ]
       }
-
     ],
   },
   {

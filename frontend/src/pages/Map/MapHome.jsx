@@ -3,9 +3,37 @@ import { useLocation } from 'react-router-dom'; // 🌟 경로 데이터 수신 
 import { Map, MapMarker, Polyline, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import { getLocapickResults } from '../../api/locapick.api';
 import { getMyFavorites, toggleFavorite } from '../../api/favorite.api';
+import { Geolocation } from '@capacitor/geolocation';
 import './MapHome.scss';
 
 const { kakao } = window;
+
+const getNativeLocation = async () => {
+  try {
+    // 1. 안드로이드 위치 권한 체크 및 요청 (웹에서는 자동으로 무시됨)
+    const check = await Geolocation.checkPermissions();
+    if (check.location !== 'granted') {
+      await Geolocation.requestPermissions();
+    }
+
+    // 2. 네이티브 센서로 고정밀 현재 위치 가져오기
+    const position = await Geolocation.getCurrentPosition({
+      enableHighAccuracy: true, // 최고 정밀도 GPS 사용 (핵심!)
+      maximumAge: 0,            // 캐시된 이전 데이터 무시
+      timeout: 10000            // 10초 내에 못 찾으면 에러
+    });
+
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    
+    console.log("네이티브 GPS 위도/경도:", lat, lng);
+    
+    // TODO: 여기서 카카오맵의 중심 좌표(state)를 lat, lng로 업데이트 해주세요!
+    
+  } catch (error) {
+    console.error("GPS 위치를 가져오는 중 에러 발생:", error);
+  }
+};
 
 const StarIcon = ({ isFilled }) => (
   <svg 

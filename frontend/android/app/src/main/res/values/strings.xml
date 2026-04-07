@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LocaPick</string>
+    <string name="title_activity_main">LocaPick</string>
+    <string name="package_name">com.locapick.app</string>
+    <string name="custom_url_scheme">com.locapick.app</string>
+</resources>

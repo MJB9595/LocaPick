@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'; // 🌟 경로 데이터 수신 
 import { Map, MapMarker, Polyline, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import { getLocapickResults } from '../../api/locapick.api';
 import { getMyFavorites, toggleFavorite } from '../../api/favorite.api';
+import { Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
 import './MapHome.scss';
 
@@ -131,7 +132,26 @@ const MapHome = () => {
   const locaResultsRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
 
-  // 🌟 2. 변수들이 다 만들어졌으니 이제 안전하게 useEffect 실행 가능!
+  useEffect(() => {
+    const initLocation = async () => {
+      // 1. 앱(안드로이드) 환경일 때
+      if (Capacitor.isNativePlatform()) {
+        await getNativeLocation(); // 아까 만드신 네이티브 함수 실행
+      } 
+      // 2. 일반 웹 브라우저 환경일 때
+      else {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((pos) => {
+            setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            setStartPoint({ name: '내 위치(웹)', lat: pos.coords.latitude, lng: pos.coords.longitude });
+          });
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initLocation();
+  }, []);
   
   // 즐겨찾기에서 넘어온 목적지 자동 세팅 
   useEffect(() => {

@@ -74,7 +74,7 @@
 
 ## MySQL (DataBase Structure)
 
-<img width="842" height="1196" alt="Image" src="https://github.com/user-attachments/assets/422dc2c4-293c-4243-8c32-d6dca6d602c9" />
+<img width="882" height="1424" alt="Image" src="https://github.com/user-attachments/assets/b65c65bb-ad47-4eee-a0f7-478875cf68cf" />
 
 - 사용자 중심의 관계형 설계를 통해 members (회원) 테이블을 최상위 부모로 두고,
 - favorites (즐겨찾기)와 posts (장소 메모) 테이블이 외래키(member_id)를 통해 N:1로 안전하게 매핑된 정석적인 RDBMS 구조입니다.

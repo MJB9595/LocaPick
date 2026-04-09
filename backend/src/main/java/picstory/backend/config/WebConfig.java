@@ -15,16 +15,4 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:/app/uploads/", "file:./uploads/");
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins(
-                        "http://localhost:5173", // 기존 PC 웹용
-                        "http://localhost",      // 안드로이드 앱(Capacitor)용 추가
-                        "https://locapick.mjb.diskstation.me"       // 나스 접속 주소 추가
-                )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true);
-    }
 }

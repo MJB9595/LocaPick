@@ -1,5 +1,8 @@
 {
   "appId": "com.locapick.app",
   "appName": "LocaPick",
-  "webDir": "dist"
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
 }

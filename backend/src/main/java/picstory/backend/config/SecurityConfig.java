@@ -72,10 +72,13 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-                "http://localhost:5173",   // Vite 개발 서버
+                "http://localhost:5173",
                 "http://localhost:3000",
                 "http://192.168.50.182:5173",
-                "https://locapick.mjb.diskstation.me"
+                "https://locapick.mjb.diskstation.me",
+                "capacitor://localhost",   // ← Capacitor 기본 scheme
+                "https://localhost",       // ← androidScheme: https 설정 시
+                "http://localhost"         // ← 개발 중 fallback
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

@@ -18,7 +18,7 @@ import picstory.backend.security.JwtUtil;
 import java.util.List;
 
 @Configuration
-@EnableMethodSecurity          // @PreAuthorize 사용 가능
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -28,20 +28,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                // CSRF 비활성화 (JWT Stateless 방식)
                 .csrf(csrf -> csrf.disable())
-
-                // CORS 설정
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // 세션 미사용 (JWT Stateless)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         // 공개 엔드포인트
                         .requestMatchers(HttpMethod.POST, "/auth/signup", "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // ✅ [카카오 로그인 추가] /auth/kakao, /auth/kakao/callback 허용
+                        .requestMatchers(HttpMethod.GET, "/auth/kakao", "/auth/kakao/callback").permitAll()
                         .requestMatchers("/auth/**", "/actuator/health", "/locapick/**", "/uploads/**", "/api/uploads/**", "/images/**", "/api/images/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
 
@@ -58,11 +54,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // 폼 로그인 & HTTP Basic 비활성화
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
 
-                // JWT 필터 추가 (UsernamePasswordAuthenticationFilter 앞에)
                 .addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -76,9 +70,9 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://192.168.50.182:5173",
                 "https://locapick.mjb.diskstation.me",
-                "capacitor://localhost",   // ← Capacitor 기본 scheme
-                "https://localhost",       // ← androidScheme: https 설정 시
-                "http://localhost"         // ← 개발 중 fallback
+                "capacitor://localhost",
+                "https://localhost",
+                "http://localhost"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

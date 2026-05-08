@@ -14,18 +14,26 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update      # 개발: update | 운영: validate 또는 none
-    show-sql: true
+      ddl-auto: update
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
 # ─── JWT ──────────────────────────────────────────────────────
 jwt:
-  # 최소 32자 이상의 시크릿 키 (운영환경에서는 환경변수로 주입)
   secret: ${JWT_SECRET:picstory-secret-key-must-be-at-least-32-chars!}
-  expiration-ms: ${JWT_EXPIRATION_MS:7200000}   # 24시간 (ms)
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
 
 # ─── Actuator ─────────────────────────────────────────────────
 management:
@@ -36,13 +44,22 @@ management:
   endpoint:
     health:
       show-details: always
-# ─── Kakao API ────────────────────────────────────────────────
+
+# ─── Kakao ────────────────────────────────────────────────────
 kakao:
-  rest-api-key: ${KAKAO_REST_KEY:default_key_if_missing}
+  # LocapickService 장소 검색용 (기존)
+  rest-key: ${KAKAO_REST_KEY:}
+
+  # KakaoAuthService OAuth 로그인용 (신규) — 동일한 REST API 키 사용
+  client-id: ${KAKAO_REST_KEY:}
+  client-secret: ${KAKAO_CLIENT_SECRET:}
+  redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8080/auth/kakao/callback}
+  frontend-redirect: ${KAKAO_FRONTEND_REDIRECT:http://localhost:5173/kakao-callback}
+
+# ─── Upload ───────────────────────────────────────────────────
+upload:
+  dir: ${UPLOAD_DIR:./uploads/profiles/}
 
 app:
   upload:
     dir: ${UPLOAD_DIR:./uploads/profiles/}
-    # 로컬 기본값: ./uploads/profiles/  (JAR 실행 위치 기준)
-    # Docker: 환경변수 UPLOAD_DIR=/app/uploads/profiles/ 주입
-

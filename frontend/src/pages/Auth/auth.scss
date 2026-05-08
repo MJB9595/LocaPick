@@ -155,3 +155,58 @@
 /* ── Signup 전용 ─────────────────────────────────────────────── */
 .required { color: $error;  font-size: 11px; }
 .optional  { color: $gray-400; font-size: 11px; font-weight: $fw-normal; }
+
+// ── 소셜 로그인 구분선 ────────────────────────────────────────────
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 4px;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+  }
+
+  span {
+    font-size: 12px;
+    color: #9ca3af;
+    white-space: nowrap;
+  }
+}
+
+// ── 카카오 로그인 버튼 ────────────────────────────────────────────
+.kakao-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 0;
+  background: #FAE100;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #3C1E1E;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    background: #f0d400;
+    box-shadow: 0 4px 12px rgba(250, 225, 0, 0.4);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  .kakao-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+}

@@ -5,6 +5,7 @@ import PublicLayout from './PublicLayout'
 import Landing from '../pages/Landing/Landing'
 import Login from '../pages/Auth/Login'
 import Signup from '../pages/Auth/Signup'
+import KakaoCallback from '../pages/Auth/KakaoCallback'  // ✅ 신규
 import Dashboard from '../pages/Dashboard/Dashboard'
 import AdminDashboard from '../pages/Admin/AdminDashboard'
 import ProtectRoute from '../store/ProtectRoute'
@@ -12,20 +13,21 @@ import MapHome from '../pages/Map/MapHome'
 import MyPage from '../pages/MyPage/MyPage'
 import Favorites from '../pages/Favorites/Favorites'
 import Memo from '../pages/Memo/Memo'
-import MemoWrite from '../pages/Memo/MemoWrite'; 
-import MemoDetail from '../pages/Memo/MemoDetail'; 
-import MemoEdit from '../pages/Memo/MemoEdit'; 
-import ChatList from '../pages/Chat/ChatList'; 
-import ChatRoom from '../pages/Chat/ChatRoom'; 
+import MemoWrite from '../pages/Memo/MemoWrite'
+import MemoDetail from '../pages/Memo/MemoDetail'
+import MemoEdit from '../pages/Memo/MemoEdit'
+import ChatList from '../pages/Chat/ChatList'
+import ChatRoom from '../pages/Chat/ChatRoom'
 
 export const router = createBrowserRouter([
   {
     // 공개 영역 (헤더/푸터 없음)
     element: <PublicLayout />,
     children: [
-      { path: '/',        element: <Landing /> },
-      { path: '/login',   element: <Login /> },
-      { path: '/signup',  element: <Signup /> },
+      { path: '/',               element: <Landing /> },
+      { path: '/login',          element: <Login /> },
+      { path: '/signup',         element: <Signup /> },
+      { path: '/kakao-callback', element: <KakaoCallback /> },  // ✅ 신규: 카카오 콜백 (퍼블릭)
     ],
   },
   {
@@ -39,22 +41,22 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <MapHome /> },
       { path: 'dashboard', element: <Dashboard /> },
-      { path: 'mypage', element: <MyPage /> },
+      { path: 'mypage',    element: <MyPage /> },
       { path: 'favorites', element: <Favorites /> },
-      { 
-        path: 'memo', 
+      {
+        path: 'memo',
         children: [
-          { index: true, element: <Memo /> },               // 목록 (/app/memo)
-          { path: 'write', element: <MemoWrite /> },        // 새 글 작성 (/app/memo/write)
-          { path: ':id', element: <MemoDetail /> },         // 글 상세 (/app/memo/123)
-          { path: 'edit/:id', element: <MemoEdit /> }       // 글 수정 (/app/memo/edit/123)
+          { index: true,        element: <Memo /> },
+          { path: 'write',      element: <MemoWrite /> },
+          { path: ':id',        element: <MemoDetail /> },
+          { path: 'edit/:id',   element: <MemoEdit /> },
         ]
       },
       {
         path: 'chat',
         children: [
-          { index: true, element: <ChatList /> },    // 채팅방 목록 (/app/chat)
-          { path: ':roomId', element: <ChatRoom /> } // 개별 채팅방 (/app/chat/123)
+          { index: true,         element: <ChatList /> },
+          { path: ':roomId',     element: <ChatRoom /> },
         ]
       }
     ],

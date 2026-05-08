@@ -14,4 +14,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
 
     List<Member> findAllByRole(MemberRole role);
+
+    // ✅ [카카오 로그인 추가] kakaoId로 회원 조회
+    Optional<Member> findByKakaoId(String kakaoId);
 }

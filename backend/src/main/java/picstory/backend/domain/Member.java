@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -29,6 +30,10 @@ public class Member {
     @Column(unique = true, length = 30)
     private String phone;
 
+    // ✅ [카카오 로그인 추가] — nullable (일반 회원은 null)
+    @Column(unique = true, length = 100)
+    private String kakaoId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private MemberRole role;
@@ -40,7 +45,7 @@ public class Member {
     @Column(nullable = false)
     private boolean emailVerified;
 
-    // 🌟 프로필 이미지 URL 추가
+    // 프로필 이미지 URL
     @Column(columnDefinition = "LONGTEXT")
     private String profileImageUrl;
 
@@ -62,33 +67,50 @@ public class Member {
 
     /** 일반 회원가입용 생성자 */
     public Member(String name, String email, String passwordHash, String phone, String profileImageUrl) {
-        this.name         = name;
-        this.email        = email;
-        this.passwordHash = passwordHash;
-        this.phone        = phone;
+        this.name            = name;
+        this.email           = email;
+        this.passwordHash    = passwordHash;
+        this.phone           = phone;
         this.profileImageUrl = profileImageUrl;
-        this.role         = MemberRole.USER;
-        this.status       = MemberStatus.ACTIVE;
-        this.emailVerified = false;
+        this.role            = MemberRole.USER;
+        this.status          = MemberStatus.ACTIVE;
+        this.emailVerified   = false;
     }
 
     /** 어드민 계정 생성용 생성자 */
     public Member(String name, String email, String passwordHash, String phone, MemberRole role, String profileImageUrl) {
-        this.name         = name;
-        this.email        = email;
-        this.passwordHash = passwordHash;
-        this.phone        = phone;
-        this.role         = role;
+        this.name            = name;
+        this.email           = email;
+        this.passwordHash    = passwordHash;
+        this.phone           = phone;
+        this.role            = role;
         this.profileImageUrl = profileImageUrl;
-        this.status       = MemberStatus.ACTIVE;
-        this.emailVerified = false;
+        this.status          = MemberStatus.ACTIVE;
+        this.emailVerified   = false;
+    }
+
+    // ✅ [카카오 로그인 추가] 카카오 소셜 로그인 전용 생성자
+    public Member(String name, String email, String kakaoId, boolean isSocial, String profileImageUrl) {
+        this.name            = name;
+        this.email           = email;
+        this.kakaoId         = kakaoId;
+        this.passwordHash    = UUID.randomUUID().toString(); // 소셜 로그인은 비밀번호 불필요 → 더미값
+        this.phone           = null;
+        this.role            = MemberRole.USER;
+        this.status          = MemberStatus.ACTIVE;
+        this.emailVerified   = true; // 카카오에서 이메일 인증 완료
+        this.profileImageUrl = profileImageUrl;
     }
 
     public void changeStatus(MemberStatus status) { this.status = status; }
-    public void changeRole(MemberRole role) { this.role = role; }
+    public void changeRole(MemberRole role)        { this.role = role; }
 
-    // 🌟 프로필 이미지 변경 메서드
     public void updateProfileImage(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    // ✅ [카카오 로그인 추가] 기존 일반 회원이 카카오 로그인 시 kakaoId 연동
+    public void updateKakaoId(String kakaoId) {
+        this.kakaoId = kakaoId;
     }
 }

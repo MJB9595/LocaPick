@@ -14,7 +14,8 @@ public record MemberResponse(
         MemberRole role,
         MemberStatus status,
         boolean emailVerified,
-        String profileImageUrl, // 🌟 추가
+        String profileImageUrl,
+        String friendCode, // ✅ 내 친구 코드 (본인 조회 시에만 의미 있음)
         LocalDateTime createdAt
 ) {
     public static MemberResponse from(Member m) {
@@ -26,7 +27,8 @@ public record MemberResponse(
                 m.getRole(),
                 m.getStatus(),
                 m.isEmailVerified(),
-                m.getProfileImageUrl(), // 🌟 추가
+                m.getProfileImageUrl(),
+                m.getFriendCode(),
                 m.getCreatedAt()
         );
     }

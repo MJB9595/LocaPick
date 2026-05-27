@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useMemo, useState } from 'react'
+import { disconnectChatSocket } from '../api/chat.socket'
 
 const AuthCtx = createContext(null) // 🌟 이름이 AuthCtx 입니다!
 
@@ -32,6 +33,8 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('authUser')
     setToken(null)
     setUser(null)
+    // 채팅 WebSocket도 정리
+    try { disconnectChatSocket() } catch { /* noop */ }
   }
 
   // 유저 정보의 일부(프로필 사진 등)만 업데이트

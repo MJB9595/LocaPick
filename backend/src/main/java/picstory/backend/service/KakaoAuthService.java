@@ -33,6 +33,7 @@ public class KakaoAuthService {
     private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
     private final RestTemplate restTemplate;
+    private final FriendCodeGenerator friendCodeGenerator;
 
     /**
      * ① 인가 코드(code) → 카카오 액세스 토큰 교환
@@ -147,14 +148,18 @@ public class KakaoAuthService {
                                     existingMember.updateKakaoId(kakaoId);
                                     return existingMember;
                                 })
-                                .orElseGet(() ->
-                                        // 3. 신규 회원 생성
-                                        memberRepository.save(new Member(finalNickname, finalEmail, kakaoId, true, finalProfileImageUrl))
-                                );
+                                .orElseGet(() -> {
+                                    // 3. 신규 회원 생성
+                                    Member newMember = new Member(finalNickname, finalEmail, kakaoId, true, finalProfileImageUrl);
+                                    newMember.assignFriendCode(friendCodeGenerator.generateUnique());
+                                    return memberRepository.save(newMember);
+                                });
                     }
                     // 이메일 없는 경우(동의 안 한 경우) → 임시 이메일로 생성
                     String tempEmail = "kakao_" + kakaoId + "@kakao.local";
-                    return memberRepository.save(new Member(finalNickname, tempEmail, kakaoId, true, finalProfileImageUrl));
+                    Member newMember = new Member(finalNickname, tempEmail, kakaoId, true, finalProfileImageUrl);
+                    newMember.assignFriendCode(friendCodeGenerator.generateUnique());
+                    return memberRepository.save(newMember);
                 });
     }
 

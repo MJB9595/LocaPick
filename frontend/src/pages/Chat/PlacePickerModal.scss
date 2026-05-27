@@ -1,0 +1,354 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.place-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: $z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 헤더(고정 64px) 영역을 침범하지 않도록 위쪽 패딩 확보 */
+  padding: calc(#{$header-h} + 12px) 20px 20px;
+
+  @include mobile {
+    padding: $header-h 0 0;
+  }
+}
+
+.place-picker-modal {
+  width: 100%;
+  max-width: 1100px;
+  /* 백드롭 padding 안에서 가능한 만큼 사용 */
+  height: calc(100vh - #{$header-h} - 32px);
+  max-height: 920px;
+  background: #fff;
+  border-radius: $r-md;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: $shadow-lg;
+
+  @include mobile {
+    height: calc(100vh - #{$header-h});
+    max-height: none;
+    border-radius: 0;
+  }
+}
+
+.pp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid $line;
+  background: #fff;
+  gap: 8px;
+
+  h2 {
+    flex: 1;
+    text-align: center;
+    margin: 0;
+    font-size: 16px;
+    font-weight: $fw-bold;
+    color: $fg;
+  }
+
+  .pp-close {
+    background: $bg-soft;
+    border: 1px solid $line;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    color: $muted;
+    transition: $ease-fast;
+    flex-shrink: 0;
+
+    &:hover { background: rgba($error, 0.1); color: $error; border-color: rgba($error, 0.3); }
+  }
+
+  .pp-confirm {
+    background: $purple;
+    color: #fff;
+    border: none;
+    padding: 9px 16px;
+    border-radius: $r-pill;
+    font-size: 13px;
+    font-weight: $fw-bold;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background $ease-fast;
+
+    &:hover:not(:disabled) { background: $purple-2; }
+    &:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    @include mobile { padding: 8px 12px; font-size: 12px; }
+  }
+}
+
+/* ── 출발지 바 ── */
+.pp-start-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 16px;
+  background: $bg-soft;
+  border-bottom: 1px solid $line;
+  font-size: 13px;
+  position: relative;
+
+  .pp-start-label {
+    background: $purple;
+    color: #fff;
+    font-weight: $fw-bold;
+    padding: 2px 8px;
+    border-radius: $r-pill;
+    font-size: 11px;
+  }
+  .pp-start-name {
+    flex: 1;
+    color: $fg;
+    font-weight: $fw-medium;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+
+    .pp-start-coord {
+      font-style: normal;
+      margin-left: 6px;
+      color: $muted;
+      font-size: 11px;
+      font-family: monospace;
+    }
+  }
+  .pp-start-edit, .pp-start-mine {
+    background: #fff;
+    border: 1px solid $line;
+    padding: 5px 10px;
+    border-radius: $r-pill;
+    font-size: 12px;
+    cursor: pointer;
+    transition: $ease-fast;
+    color: $fg;
+
+    &:hover {
+      border-color: $purple;
+      color: $purple;
+      background: rgba($purple, 0.05);
+    }
+  }
+
+  .pp-start-edit-form {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    flex-wrap: wrap;
+    position: relative;
+
+    input {
+      flex: 1;
+      min-width: 160px;
+      padding: 7px 10px;
+      border: 1px solid $gray-300;
+      border-radius: $r-xs;
+      font-size: 13px;
+      outline: none;
+      &:focus { border-color: $purple; }
+    }
+    button {
+      background: $bg-soft;
+      border: 1px solid $line;
+      padding: 7px 10px;
+      border-radius: $r-xs;
+      font-size: 12px;
+      cursor: pointer;
+      &:hover { border-color: $purple; color: $purple; }
+
+      &[type="submit"] {
+        background: $purple;
+        color: #fff;
+        border-color: $purple;
+        &:hover { background: $purple-2; color: #fff; }
+      }
+      &.pp-start-as-end {
+        background: rgba($aquablue, 0.15);
+        border-color: rgba($aquablue, 0.4);
+        color: darken-color($aquablue, 30);
+      }
+    }
+  }
+
+  .pp-start-results {
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+    background: #fff;
+    border: 1px solid $line;
+    border-radius: $r-sm;
+    box-shadow: $shadow;
+    width: 100%;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 5;
+
+    li {
+      display: flex;
+      flex-direction: column;
+      padding: 8px 10px;
+      cursor: pointer;
+      border-radius: $r-xs;
+      gap: 2px;
+
+      &:hover { background: $bg-hover; }
+
+      strong { font-size: 13px; color: $fg; }
+      span { font-size: 11px; color: $muted; }
+    }
+  }
+}
+
+/* sass에 darken-color 가 없으니 안전한 폴백 — Use color.adjust 권장이지만 기존 컨벤션상 단색으로 대체 */
+@function darken-color($c, $_) {
+  @return $c;
+}
+
+/* ── 본문(좌 리스트 / 우 지도) ── */
+.pp-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: 0;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    grid-template-rows: 240px 1fr;
+  }
+}
+
+.pp-side {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid $line;
+  min-height: 0;
+
+  @include mobile {
+    border-right: none;
+    border-bottom: 1px solid $line;
+  }
+
+  .pp-search {
+    display: flex;
+    gap: 6px;
+    padding: 10px 12px;
+    border-bottom: 1px solid $line;
+
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 12px;
+      border: 1px solid $gray-300;
+      border-radius: $r-pill;
+      font-size: 13px;
+      outline: none;
+      background: $gray-50;
+
+      &:focus { border-color: $purple; background: #fff; }
+    }
+    button {
+      background: $purple;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: $r-pill;
+      font-size: 12px;
+      font-weight: $fw-bold;
+      cursor: pointer;
+      flex-shrink: 0;
+
+      &:hover:not(:disabled) { background: $purple-2; }
+      &:disabled { opacity: 0.45; cursor: not-allowed; }
+    }
+  }
+
+  .pp-tip {
+    padding: 8px 14px;
+    font-size: 11px;
+    color: $muted;
+    border-bottom: 1px solid $gray-100;
+    background: $bg-soft;
+  }
+
+  .pp-results {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar { width: 5px; }
+    &::-webkit-scrollbar-thumb { background: $gray-300; border-radius: 4px; }
+
+    li {
+      display: flex;
+      flex-direction: column;
+      padding: 10px 14px;
+      gap: 3px;
+      border-bottom: 1px solid $gray-100;
+      cursor: pointer;
+      transition: background $ease-fast;
+
+      &:hover { background: $bg-hover; }
+      &.on { background: rgba($purple, 0.1); }
+
+      .r-name { font-size: 14px; color: $fg; font-weight: $fw-bold; }
+      .r-addr { font-size: 12px; color: $muted; }
+      .r-phone { font-size: 11px; color: $purple; }
+      &.r-empty { color: $muted; cursor: default; text-align: center; padding: 30px 14px; }
+    }
+  }
+}
+
+.pp-map-wrap {
+  position: relative;
+  min-height: 0;
+  background: $gray-100;
+}
+
+.pp-footer {
+  border-top: 1px solid $line;
+  padding: 10px 16px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+
+  .pp-end-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+
+    .pp-end-icon { font-size: 18px; }
+    .pp-end-text {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      strong {
+        font-size: 14px;
+        color: $fg;
+        font-weight: $fw-bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      span { font-size: 12px; color: $muted; }
+    }
+  }
+  .pp-end-empty { color: $muted; font-size: 13px; }
+}

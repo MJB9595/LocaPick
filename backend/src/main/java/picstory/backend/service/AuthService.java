@@ -22,6 +22,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder  passwordEncoder;
     private final JwtUtil          jwtUtil;
+    private final FriendCodeGenerator friendCodeGenerator;
 
     @Transactional(readOnly = true)
     public boolean existsByEmail(String email) {
@@ -54,6 +55,7 @@ public class AuthService {
 
         String hash = passwordEncoder.encode(req.password());
         Member member = new Member(req.name(), req.email(), hash, req.phone(), defaultProfileUrl);
+        member.assignFriendCode(friendCodeGenerator.generateUnique());
         return memberRepository.save(member).getId();
     }
 

@@ -1,0 +1,137 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+/*
+ * ── 2-pane 채팅 레이아웃 ──
+ *
+ * 핵심: 페이지 자체에 추가 스크롤이 절대 발생하지 않도록 fixed positioning 으로
+ *       헤더 아래 영역을 정확히 차지한다.
+ *
+ * 데스크탑: 헤더(고정 64) 아래 ~ 푸터(자연 높이) 위까지 채팅 영역
+ *           푸터 높이가 폰트/언어/줄바꿈에 따라 흔들려도 영향받지 않도록
+ *           bottom 도 고정값으로 잡는다.
+ * 모바일: 푸터 가리고 헤더 아래 ~ 화면 끝까지 사용 (100dvh 활용)
+ */
+$chat-footer-reserve: 78px; /* 푸터 높이 가드 (실측 70 + 여유 8) */
+
+.chat-layout {
+  --chat-list-w: 360px;
+
+  position: fixed;
+  top: $header-h;
+  left: 0;
+  right: 0;
+  bottom: $chat-footer-reserve;
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: var(--chat-list-w) 1fr;
+  gap: 16px;
+  box-sizing: border-box;
+  z-index: 5;
+
+  @media (max-width: 1024px) {
+    --chat-list-w: 300px;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  @include mobile {
+    /* 모바일에서는 푸터 자리 잡지 않고 화면 끝까지 사용
+       (모바일 브라우저의 동적 주소창 변동에는 dvh 사용) */
+    bottom: 0;
+    padding: 0;
+    gap: 0;
+    grid-template-columns: 1fr;
+    max-width: 100%;
+
+    /* dvh 미지원 환경 폴백 */
+    height: calc(100vh - #{$header-h});
+    height: calc(100dvh - #{$header-h});
+    /* fixed 일 때 height 가 무시될 수 있으므로 top/bottom 도 한번 더 */
+    top: $header-h;
+  }
+}
+
+/*
+ * 푸터가 채팅 페이지에서도 자연스럽게 보여야 하므로
+ * body 흐름에 그대로 두지만, 채팅 영역이 fixed 라서 페이지 본문은 비어있게 된다.
+ * → 푸터가 화면 아래에 자연스럽게 위치 (정상)
+ *
+ * 데스크탑 chat-layout 의 bottom 값이 푸터 영역을 비워두므로 푸터가 그 자리에 보임
+ * 모바일 chat-layout 은 화면 가득 → 푸터가 화면 밖으로 자연스럽게 가림
+ */
+
+.chat-layout__list,
+.chat-layout__detail {
+  background: #fff;
+  border: 1px solid $line;
+  border-radius: $r-md;
+  overflow: hidden;
+  /* 부모 fixed 영역을 정확히 채우고, 자식은 절대 부모를 초과하지 못하게 */
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  box-shadow: $shadow-sm;
+  display: flex;
+  flex-direction: column;
+
+  /* 글로벌 min-height: 100vh 같은 룰이 자식에 적용되어도 무력화 */
+  > * {
+    min-height: 0;
+  }
+
+  @include mobile {
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+/* ── 모바일 토글 ── */
+@include mobile {
+  .chat-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+
+    .chat-layout__list,
+    .chat-layout__detail {
+      grid-column: 1 / 2;
+      grid-row: 1 / 2;
+    }
+
+    .chat-layout__list   { display: flex; }
+    .chat-layout__detail { display: none; }
+
+    &.room-active {
+      .chat-layout__list   { display: none; }
+      .chat-layout__detail { display: flex; }
+    }
+  }
+}
+
+
+/*
+ * body.chat-page — 채팅 페이지 전용 보정.
+ *
+ * chat-layout 이 fixed 라서 페이지 본문이 비어있어 푸터가 viewport 위로 올라올 수 있다.
+ * Outlet 자리(즉 ProtectApp의 <Outlet/> 위치)에 spacer 역할을 줘서
+ * 페이지 전체 높이를 viewport 만큼 확보한다.
+ *
+ * 또한 채팅 페이지에서는 body 자체 스크롤이 발생할 일이 없도록 막아
+ * 모바일에서 주소창 변동에 따른 viewport jump 도 줄인다.
+ */
+body.chat-page {
+  /* 페이지 전체가 한 화면에 정확히 들어가도록 강제 */
+  overflow: hidden;
+  height: 100vh;
+  height: 100dvh;
+
+  /* 모바일에서는 푸터가 아예 안 보이도록 (chat-layout이 화면 가득 차지) */
+  @include mobile {
+    .footer {
+      display: none;
+    }
+  }
+}

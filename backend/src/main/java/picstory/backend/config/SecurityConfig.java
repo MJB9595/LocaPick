@@ -40,6 +40,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/auth/kakao", "/auth/kakao/callback").permitAll()
                         .requestMatchers("/auth/**", "/actuator/health", "/locapick/**", "/uploads/**", "/api/uploads/**", "/images/**", "/api/images/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+                        // ✅ WebSocket(STOMP) 핸드셰이크 — 토큰 검증은 ChannelInterceptor에서 수행
+                        .requestMatchers("/ws/**").permitAll()
 
                         // 어드민 전용 엔드포인트
                         .requestMatchers("/admin/**").hasRole("ADMIN")

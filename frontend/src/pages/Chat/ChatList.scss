@@ -1,76 +1,317 @@
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
 
-.chatlist-root {
-  min-height: 100vh;
-  padding-top: calc(80px + 20px); // 헤더 높이 고려
+/* ── ChatLayout 안의 좌측 패널 컨텐츠 ── */
+.chatlist-pane {
   display: flex;
-  justify-content: center;
-}
-
-.chatlist-container {
+  flex-direction: column;
+  height: 100%;
   width: 100%;
-  max-width: 600px;
   background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  min-height: 0;
 }
 
 .list-header {
-  padding: 20px;
-  border-bottom: 1px solid #eee;
-  h2 { margin: 0; font-size: 1.2rem; color: #333; }
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid $line;
+  background: #fff;
+
+  h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: $fw-bold;
+    color: $fg;
+  }
+
+  .list-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .new-btn,
+  .refresh-btn {
+    background: $bg-soft;
+    border: 1px solid $line;
+    color: $muted;
+    width: 32px;
+    height: 32px;
+    border-radius: $r-pill;
+    font-size: 13px;
+    cursor: pointer;
+    transition: $ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .new-btn {
+    background: $purple;
+    color: #fff;
+    border-color: $purple;
+
+    &:hover {
+      background: $purple-2;
+      transform: translateY(-1px);
+      box-shadow: $shadow-sm;
+    }
+  }
+
+  .refresh-btn {
+    font-size: 15px;
+
+    &:hover {
+      background: rgba($purple, 0.08);
+      color: $purple;
+      border-color: rgba($purple, 0.3);
+      transform: rotate(45deg);
+    }
+  }
 }
 
-.room-list {
+.chatlist-pane .state-msg {
+  padding: 40px 20px;
+  text-align: center;
+  color: $muted;
+  font-size: 14px;
+
+  &.error { color: $error; }
+}
+
+.chatlist-pane .empty-state {
+  padding: 60px 24px;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+  .empty-title {
+    font-size: 16px;
+    font-weight: $fw-bold;
+    color: $fg;
+    margin-bottom: 6px;
+  }
+  .empty-desc {
+    font-size: 13px;
+    color: $muted;
+    line-height: 1.5;
+    margin-bottom: 18px;
+  }
+
+  .empty-cta {
+    background: $purple;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: $r-pill;
+    font-size: 13px;
+    font-weight: $fw-bold;
+    cursor: pointer;
+    transition: background $ease-fast, transform $ease-fast;
+
+    &:hover {
+      background: $purple-2;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.chatlist-pane .room-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb { background: $gray-300; border-radius: 4px; }
 }
 
-.room-item {
+.chatlist-pane .room-item {
   display: flex;
-  align-items: center;
-  padding: 15px 20px;
-  border-bottom: 1px solid #f5f5f5;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid $gray-100;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background $ease-fast;
+  position: relative;
 
-  &:hover { background: #f9f9f9; }
+  &:hover { background: $bg-hover; }
+
+  &.has-unread {
+    background: rgba($purple, 0.04);
+    .name { font-weight: $fw-bold; }
+    .last-msg { color: $fg; font-weight: $fw-medium; }
+  }
+
+  /* 현재 선택된 방 — 좌측 보라 인디케이터 */
+  &.is-active {
+    background: rgba($purple, 0.08);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: $purple;
+    }
+    .name { color: $purple; }
+  }
+
+  &.is-deleting {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* 삭제 버튼 — 데스크탑 hover 시 노출, 모바일은 항상 노출 */
+  .room-delete-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: #fff;
+    border: 1px solid $line;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: $muted;
+    font-size: 11px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(-2px);
+    transition: opacity $ease-fast, transform $ease-fast, color $ease-fast, background $ease-fast, border-color $ease-fast;
+
+    &:hover {
+      background: rgba($error, 0.1);
+      color: $error;
+      border-color: rgba($error, 0.3);
+    }
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    @include mobile {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  &:hover .room-delete-btn {
+    opacity: 1;
+    transform: none;
+  }
 
   .profile-avatar {
-    width: 50px;
-    height: 50px;
-    background: #8b5cf6;
-    color: #fff;
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
+    background: linear-gradient(135deg, $purple, $purple-2);
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    margin-right: 15px;
+    font-weight: $fw-bold;
+    font-size: 17px;
+    flex-shrink: 0;
+    overflow: hidden;
+    box-shadow: $shadow-sm;
+
+    img { width: 100%; height: 100%; object-fit: cover; }
   }
 
   .room-info {
     flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    /* 우상단 삭제 버튼 자리 확보 */
+    padding-right: 28px;
+
     .info-top {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 5px;
-      .name { font-weight: 600; color: #333; }
-      .time { font-size: 0.8rem; color: #999; }
+      align-items: center;
+      gap: 8px;
+
+      .name {
+        font-size: 14px;
+        color: $fg;
+        font-weight: $fw-medium;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .time {
+        font-size: 11px;
+        color: $muted;
+        flex-shrink: 0;
+      }
     }
+
+    .post-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      max-width: 100%;
+      padding: 2px 8px;
+      background: rgba($purple, 0.08);
+      color: $purple;
+      border-radius: $r-pill;
+      font-size: 11px;
+      align-self: flex-start;
+
+      .post-tag-text {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
     .info-bottom {
       display: flex;
       justify-content: space-between;
-      .last-msg { font-size: 0.9rem; color: #666; }
+      align-items: center;
+      gap: 8px;
+
+      .last-msg {
+        flex: 1;
+        font-size: 12px;
+        color: $muted;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.4;
+      }
+
       .unread-badge {
-        background: #ef4444;
+        background: $error;
         color: #fff;
-        font-size: 0.7rem;
-        padding: 2px 6px;
-        border-radius: 10px;
+        font-size: 11px;
+        font-weight: $fw-bold;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: $r-pill;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
       }
     }
   }

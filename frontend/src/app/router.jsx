@@ -16,8 +16,9 @@ import Memo from '../pages/Memo/Memo'
 import MemoWrite from '../pages/Memo/MemoWrite'
 import MemoDetail from '../pages/Memo/MemoDetail'
 import MemoEdit from '../pages/Memo/MemoEdit'
-import ChatList from '../pages/Chat/ChatList'
 import ChatRoom from '../pages/Chat/ChatRoom'
+import ChatLayout from '../pages/Chat/ChatLayout'
+import ChatEmpty from '../pages/Chat/ChatEmpty'
 
 export const router = createBrowserRouter([
   {
@@ -54,9 +55,10 @@ export const router = createBrowserRouter([
       },
       {
         path: 'chat',
+        element: <ChatLayout />,
         children: [
-          { index: true,         element: <ChatList /> },
-          { path: ':roomId',     element: <ChatRoom /> },
+          { index: true,     element: <ChatEmpty /> },
+          { path: ':roomId', element: <ChatRoom /> },
         ]
       }
     ],

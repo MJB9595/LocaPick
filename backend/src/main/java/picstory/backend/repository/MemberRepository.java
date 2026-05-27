@@ -17,4 +17,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // ✅ [카카오 로그인 추가] kakaoId로 회원 조회
     Optional<Member> findByKakaoId(String kakaoId);
+
+    // ✅ 친구 코드로 멤버 조회
+    Optional<Member> findByFriendCode(String friendCode);
+
+    boolean existsByFriendCode(String friendCode);
+
+    // 친구 코드가 아직 없는 회원 조회 (마이그레이션용)
+    List<Member> findAllByFriendCodeIsNull();
 }

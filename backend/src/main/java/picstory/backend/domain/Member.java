@@ -49,6 +49,10 @@ public class Member {
     @Column(columnDefinition = "LONGTEXT")
     private String profileImageUrl;
 
+    /** 친구 추가용 8자리 코드 (영숫자 대문자). 가입 시 자동 생성. */
+    @Column(unique = true, length = 12)
+    private String friendCode;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -107,6 +111,11 @@ public class Member {
 
     public void updateProfileImage(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    /** 친구 코드는 한 번 부여하면 변경 불가 (필요 시 admin 만 재발급) */
+    public void assignFriendCode(String code) {
+        this.friendCode = code;
     }
 
     // ✅ [카카오 로그인 추가] 기존 일반 회원이 카카오 로그인 시 kakaoId 연동

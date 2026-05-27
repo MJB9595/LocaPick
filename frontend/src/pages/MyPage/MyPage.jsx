@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'; // 🌟 페이지 이동을 위�
 import { getMyInfo, uploadProfileImage } from '../../api/member.api';
 import { getMyPosts } from '../../api/post.api';
 import { getMyFavorites } from '../../api/favorite.api';
-import { useLocation } from 'react-router-dom';
+import FriendsPanel from './FriendsPanel';
 import './MyPage.scss';
 
 // 자체 SVG 아바타 생성 (외부 API X)
@@ -138,20 +138,17 @@ const MyPage = () => {
         {/* ── 대시보드 ── */}
         <div className="board-container">
 
-          {/* 🌟 1:1 채팅 문의 */}
-          <div className="board-card card clickable-card" onClick={goToChat}>
-            <div className="b-header">
-              <h3>💬 1:1 채팅 문의</h3>
+          {/* 🌟 친구와 채팅하기 */}
+          <div className="board-card card friends-card">
+            <div className="b-header clickable-header" onClick={goToChat} title="채팅 목록 열기">
+              <h3>💬 친구와 채팅하기</h3>
               <div className="h-right">
-                <span className="badge-count">New</span>
+                <span className="badge-count">친구</span>
                 <span className="more-icon">❯</span>
               </div>
             </div>
             <div className="b-body">
-              <div className="chat-shortcut">
-                <p>진행 중인 대화가 있나요?</p>
-                <span>상대방과 실시간으로 소통해 보세요.</span>
-              </div>
+              <FriendsPanel myFriendCode={userInfo.friendCode} />
             </div>
           </div>
 

@@ -46,7 +46,8 @@ public class MemberController {
     @GetMapping("/me")
     public ResponseEntity<MemberResponse> getMyInfo(Authentication auth) {
         Long memberId = (Long) auth.getPrincipal();
-        return ResponseEntity.ok(MemberResponse.from(memberService.findById(memberId)));
+        // 친구 코드가 없는 기존 회원이라면 이 시점에 즉시 발급한다 (lazy 마이그레이션)
+        return ResponseEntity.ok(MemberResponse.from(memberService.findByIdEnsuringFriendCode(memberId)));
     }
 
     @PostMapping("/me/profile-image")
